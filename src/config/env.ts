@@ -6,5 +6,6 @@ export const config = {
     projectKey: import.meta.env.VITE_JIRA_PROJECT_KEY || '',
     storyPointField: import.meta.env.VITE_JIRA_STORY_POINT_FIELD || 'customfield_10050',
     developerField: import.meta.env.VITE_JIRA_DEVELOPER_FIELD || 'customfield_10108',
+    boardId: import.meta.env.VITE_JIRA_BOARD_ID || ''
   }
 };

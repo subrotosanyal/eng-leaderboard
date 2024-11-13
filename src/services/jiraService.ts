@@ -13,7 +13,8 @@ export class JiraService {
       config.jira.baseUrl &&
       config.jira.apiToken &&
       config.jira.email &&
-      config.jira.projectKey
+      config.jira.projectKey &&
+        config.jira.boardId
     );
 
     if (!this.isConfigured) {
@@ -33,7 +34,7 @@ export class JiraService {
 
     try {
       while (true) {
-        const response = await api.get(`/rest/agile/1.0/board/61/sprint?state=active,closed&startAt=${startAt}&maxResults=${maxResults}`);
+        const response = await api.get(`/rest/agile/1.0/board/${config.jira.boardId}/sprint?state=active,closed&startAt=${startAt}&maxResults=${maxResults}`);
         const fetchedSprints = response.data.values
             .filter((sprint: Sprint) => sprint && sprint.startDate) // Ensure sprint and startDate are defined
             .map((sprint: Sprint) => ({
