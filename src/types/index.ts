@@ -33,3 +33,18 @@ export interface TimeframeOption {
   value: string;
   type: 'sprint' | 'week' | 'month';
 }
+
+export interface Assignee {
+  accountId: string;
+  displayName: string;
+  avatarUrls: { '48x48': string };
+}
+
+export interface Issue {
+  id: string;
+  key: string;
+  fields: {
+    assignee: Assignee | null;
+    [key: string]: unknown;
+  };
+}

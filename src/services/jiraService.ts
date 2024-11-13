@@ -1,12 +1,12 @@
 import api from './api';
 import { queries } from './jiraQueries';
 import { subMonths, isAfter } from 'date-fns';
-import type { Developer, TimeframeStats, Sprint, TimeframeOption } from '../types';
+import type { Developer, Sprint, TimeframeOption, Issue, Assignee } from '../types';
 import { mockTimeframeStats, mockSprints } from '../mocks/data';
 import { config } from '../config/env';
 
 export class JiraService {
-  private isConfigured: boolean;
+  private readonly isConfigured: boolean;
 
   constructor() {
     this.isConfigured = Boolean(
@@ -35,8 +35,8 @@ export class JiraService {
       while (true) {
         const response = await api.get(`/rest/agile/1.0/board/61/sprint?state=active,closed&startAt=${startAt}&maxResults=${maxResults}`);
         const fetchedSprints = response.data.values
-            .filter((sprint: any) => sprint && sprint.startDate) // Ensure sprint and startDate are defined
-            .map((sprint: any) => ({
+            .filter((sprint: Sprint) => sprint && sprint.startDate) // Ensure sprint and startDate are defined
+            .map((sprint: Sprint) => ({
               id: sprint.id,
               name: sprint.name,
               startDate: sprint.startDate,
@@ -63,16 +63,16 @@ export class JiraService {
     }
   }
 
-  private async fetchIssues(jql: string) {
+  private async fetchIssues(jql: string): Promise<Issue[]> {
     const response = await api.post('/rest/api/3/search', {
       jql,
       fields: ['assignee', config.jira.storyPointField, 'status', 'updated'],
       maxResults: 100
     });
-    return response.data.issues;
+    return response.data.issues as Issue[];
   }
 
-  private processIssues(issues: any[]): Developer[] {
+  private processIssues(issues: Issue[]): Developer[] {
     const devMap = new Map<string, {
       id: string;
       name: string;
@@ -83,7 +83,7 @@ export class JiraService {
     }>();
 
     issues.forEach(issue => {
-      const assignee = issue.fields.assignee;
+      const assignee: Assignee | null = issue.fields.assignee;
       if (!assignee) return;
 
       const devData = devMap.get(assignee.accountId) || {
