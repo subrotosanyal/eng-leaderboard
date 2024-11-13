@@ -1,10 +1,20 @@
 {
   "name": "developer-leaderboard",
   "private": true,
+  "proxy": {
+    "/rest" : {
+      "target" : "https://sightview.atlassian.net/",
+      "changeOrigin" : true
+    },
+    "/jobs" : {
+      "target" : "https://stackoverflow.com",
+      "changeOrigin" : true
+    }
+  },
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host 0.0.0.0",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"

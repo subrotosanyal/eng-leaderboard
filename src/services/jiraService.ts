@@ -1,6 +1,6 @@
 import api from './api';
 import { queries } from './jiraQueries';
-import { format } from 'date-fns';
+import { subMonths, isAfter } from 'date-fns';
 import type { Developer, TimeframeStats, Sprint, TimeframeOption } from '../types';
 import { mockTimeframeStats, mockSprints } from '../mocks/data';
 import { config } from '../config/env';
@@ -26,14 +26,37 @@ export class JiraService {
       return mockSprints;
     }
 
+    const sprints: Sprint[] = [];
+    let startAt = 0;
+    const maxResults = 50; // Adjust as needed
+    const twelveMonthsAgo = subMonths(new Date(), 12);
+
     try {
-      const response = await api.get('/rest/agile/1.0/board/1/sprint?state=active,closed');
-      return response.data.values.map((sprint: any) => ({
-        id: sprint.id,
-        name: sprint.name,
-        startDate: sprint.startDate,
-        endDate: sprint.endDate
-      }));
+      while (true) {
+        const response = await api.get(`/rest/agile/1.0/board/61/sprint?state=active,closed&startAt=${startAt}&maxResults=${maxResults}`);
+        const fetchedSprints = response.data.values
+            .filter((sprint: any) => sprint && sprint.startDate) // Ensure sprint and startDate are defined
+            .map((sprint: any) => ({
+              id: sprint.id,
+              name: sprint.name,
+              startDate: sprint.startDate,
+              endDate: sprint.endDate
+            }))
+            .filter((sprint: Sprint) => isAfter(new Date(sprint.startDate), twelveMonthsAgo));
+
+        sprints.push(...fetchedSprints);
+
+        if (response.data.isLast) {
+          break;
+        }
+
+        startAt += maxResults;
+      }
+
+      // Sort sprints by startDate in descending order
+      sprints.sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
+
+      return sprints;
     } catch (error) {
       console.error('Failed to fetch sprints:', error);
       return mockSprints;
@@ -43,7 +66,7 @@ export class JiraService {
   private async fetchIssues(jql: string) {
     const response = await api.post('/rest/api/3/search', {
       jql,
-      fields: ['assignee', 'customfield_10026', 'status', 'updated'],
+      fields: ['assignee', config.jira.storyPointField, 'status', 'updated'],
       maxResults: 100
     });
     return response.data.issues;
@@ -71,7 +94,7 @@ export class JiraService {
         ticketsClosed: 0
       };
 
-      devData.storyPoints += issue.fields.customfield_10026 || 0;
+      devData.storyPoints += issue.fields[config.jira.storyPointField] || 0;
       devData.ticketsClosed += 1;
 
       devMap.set(assignee.accountId, devData);
@@ -93,7 +116,7 @@ export class JiraService {
 
     try {
       let jql = '';
-      
+
       switch (timeframe.type) {
         case 'sprint':
           jql = queries.sprintIssues(timeframe.value);
