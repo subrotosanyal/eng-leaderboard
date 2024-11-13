@@ -9,6 +9,11 @@ export default defineConfig({
     exclude: ['lucide-react'],
   },
   server: {
+    host: true,
+    port: 5173,
+    watch: {
+      usePolling: true,
+    },
     proxy: {
       "/rest": {
         target: "https://sightview.atlassian.net/",

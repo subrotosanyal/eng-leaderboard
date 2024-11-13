@@ -1,8 +1,13 @@
 services:
-  react-app:
+  leaderboard-app:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "80:80"
+      - "80:5173"
     restart: unless-stopped
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
