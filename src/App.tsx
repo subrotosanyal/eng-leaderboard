@@ -19,6 +19,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isMockData, setIsMockData] = useState(false);
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     const initializeData = async () => {
@@ -81,6 +82,10 @@ function App() {
     }));
   };
 
+  const filteredDevelopers = developers.filter(dev =>
+    dev.name.toLowerCase().includes(search.toLowerCase())
+  );
+
   if (error) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -108,6 +113,16 @@ function App() {
           />
         </div>
 
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Search developers..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="border p-2 rounded w-full"
+          />
+        </div>
+
         {isMockData && (
           <div className="mb-6 bg-yellow-50 border-l-4 border-yellow-400 p-4">
             <div className="flex">
@@ -132,7 +147,7 @@ function App() {
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              {developers.map((developer, index) => (
+              {filteredDevelopers.map((developer, index) => (
                 <LeaderCard
                   key={developer.id}
                   developer={developer}
