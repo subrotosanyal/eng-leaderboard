@@ -80,6 +80,7 @@ export class JiraService {
       storyPoints: number;
       ticketsClosed: number;
       previousRank?: number;
+      ticketKeys: string[]; // Add this line
     }>();
 
     issues.forEach(issue => {
@@ -91,11 +92,14 @@ export class JiraService {
         name: assignee.displayName,
         avatar: assignee.avatarUrls['48x48'],
         storyPoints: 0,
-        ticketsClosed: 0
+        ticketsClosed: 0,
+        ticketKeys: [] // Initialize the array
       };
 
-      devData.storyPoints += issue.fields[config.jira.storyPointField] || 0;
+      const storyPoints = Number(issue.fields[config.jira.storyPointField]) || 0;
+      devData.storyPoints += storyPoints;
       devData.ticketsClosed += 1;
+      devData.ticketKeys.push(issue.key); // Add the ticket key
 
       devMap.set(assignee.accountId, devData);
     });

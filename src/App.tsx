@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Layout, BarChart3, Users } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Layout, Users } from 'lucide-react';
 import LeaderCard from './components/LeaderCard';
 import PerformanceChart from './components/PerformanceChart';
 import TimeframeSelector from './components/TimeframeSelector';
@@ -37,7 +37,7 @@ function App() {
         };
         setSelectedTimeframe(initialTimeframe);
 
-        setIsMockData(!Boolean(
+        setIsMockData(!(
           config.jira.baseUrl &&
           config.jira.apiToken &&
           config.jira.email &&
