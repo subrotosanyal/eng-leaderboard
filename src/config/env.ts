@@ -4,6 +4,7 @@ export const config = {
     apiToken: import.meta.env.VITE_JIRA_API_TOKEN || '',
     email: import.meta.env.VITE_JIRA_EMAIL || '',
     projectKey: import.meta.env.VITE_JIRA_PROJECT_KEY || '',
-    storyPointField: import.meta.env.VITE_JIRA_STORY_POINT_FIELD || 'customfield_10050'
+    storyPointField: import.meta.env.VITE_JIRA_STORY_POINT_FIELD || 'customfield_10050',
+    developerField: import.meta.env.VITE_JIRA_DEVELOPER_FIELD || 'customfield_10108',
   }
 };

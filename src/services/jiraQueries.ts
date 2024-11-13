@@ -22,8 +22,8 @@ export const queries = {
     `;
   },
 
-  monthlyIssues: (yearMonth: string) => {
-    const start = new Date(`${yearMonth}-01`);
+  monthlyIssues: (startDate: string) => {
+    const start = new Date(startDate);
     const end = addMonths(start, 1);
     return `
       project = ${config.jira.projectKey}

@@ -66,7 +66,7 @@ export class JiraService {
   private async fetchIssues(jql: string): Promise<Issue[]> {
     const response = await api.post('/rest/api/3/search', {
       jql,
-      fields: ['assignee', config.jira.storyPointField, 'status', 'updated'],
+      fields: ['assignee', config.jira.storyPointField, config.jira.developerField, 'customfield_10110', 'status', 'updated'],
       maxResults: 100
     });
     return response.data.issues as Issue[];
@@ -80,37 +80,39 @@ export class JiraService {
       storyPoints: number;
       ticketsClosed: number;
       previousRank?: number;
-      ticketKeys: string[]; // Add this line
+      ticketKeys: string[];
     }>();
 
     issues.forEach(issue => {
-      const assignee: Assignee | null = issue.fields.assignee;
-      if (!assignee) return;
+      const developers: Assignee[] = issue.fields[config.jira.developerField] as Assignee[];
+      const developer: Assignee | null = (developers && developers.length > 0) ? developers[0] : issue.fields.assignee;
 
-      const devData = devMap.get(assignee.accountId) || {
-        id: assignee.accountId,
-        name: assignee.displayName,
-        avatar: assignee.avatarUrls['48x48'],
+      if (!developer) return;
+
+      const devData = devMap.get(developer.accountId) || {
+        id: developer.accountId,
+        name: developer.displayName,
+        avatar: developer.avatarUrls['48x48'],
         storyPoints: 0,
         ticketsClosed: 0,
-        ticketKeys: [] // Initialize the array
+        ticketKeys: []
       };
 
       const storyPoints = Number(issue.fields[config.jira.storyPointField]) || 0;
       devData.storyPoints += storyPoints;
       devData.ticketsClosed += 1;
-      devData.ticketKeys.push(issue.key); // Add the ticket key
+      devData.ticketKeys.push(issue.key);
 
-      devMap.set(assignee.accountId, devData);
+      devMap.set(developer.accountId, devData);
     });
 
     return Array.from(devMap.values())
-      .sort((a, b) => b.storyPoints - a.storyPoints)
-      .map((dev, index) => ({
-        ...dev,
-        rank: index + 1,
-        trend: dev.previousRank ? dev.previousRank - (index + 1) : 0
-      }));
+        .sort((a, b) => b.storyPoints - a.storyPoints)
+        .map((dev, index) => ({
+          ...dev,
+          rank: index + 1,
+          trend: dev.previousRank ? dev.previousRank - (index + 1) : 0
+        }));
   }
 
   async getTimeframeData(timeframe: TimeframeOption): Promise<Developer[]> {
