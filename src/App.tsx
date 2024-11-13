@@ -152,6 +152,7 @@ function App() {
                   key={developer.id}
                   developer={developer}
                   rank={index + 1}
+                  tickets={[]} // Pass the appropriate tickets array here
                 />
               ))}
             </div>

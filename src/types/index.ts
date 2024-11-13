@@ -13,6 +13,7 @@ export interface Developer {
   ticketsClosed: number;
   trend: number;
   rank: number;
+  issues: Issue[];
 }
 
 export interface TimeframeStats {
