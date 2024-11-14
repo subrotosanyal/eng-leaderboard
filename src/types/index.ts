@@ -49,10 +49,3 @@ export interface Issue {
     [key: string]: unknown;
   };
 }
-
-export interface JiraConfig {
-  project: string;
-  board: string;
-  developerField: string;
-  storyPointField: string;
-}

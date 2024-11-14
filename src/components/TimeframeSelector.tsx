@@ -48,6 +48,7 @@ const TimeframeSelector: React.FC<TimeframeSelectorProps> = ({ selected, sprints
 
   return (
     <div className="flex flex-col space-y-2">
+      <span className="text-gray-700">Timeframe:</span>
       {isLoading ? (
         <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-gray-500"></div>
       ) : (

@@ -1,36 +1,30 @@
-import { defineConfig, loadEnv } from 'vite';
+import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 
-export default defineConfig(({ mode }) => {
-  // Load env file based on `mode` in the current working directory.
-  // Set the third parameter to '' to load all env regardless of the `VITE_` prefix.
-  const env = loadEnv(mode, process.cwd(), '')
-  return {
-    // vite config
-    define: {
-      __APP_ENV__: JSON.stringify(env.APP_ENV),
+// https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [react()],
+  optimizeDeps: {
+    exclude: ['lucide-react'],
+  },
+  server: {
+    host: true,
+    port: 5173,
+    watch: {
+      usePolling: true,
     },
-    plugins :[react()],
-    optimizeDeps: {
-      exclude: ['lucide-react'],
+    proxy: {
+      "/rest": {
+        target: "https://sightview.atlassian.net/",
+        changeOrigin: true,
+        secure: false,
+        agent: "",
+        headers: {
+          origin: "https://sightview.atlassian.net",
+        }
+        // rewrite: (path) => path.replace(/^\/jiraapi/, ""),
+      },
     },
-    server: {
-      host: true,
-      port: 5173,
-      watch: {
-        usePolling: true,
-      },
-      proxy: {
-        "/rest": {
-          target: env.VITE_JIRA_BASE_URL,
-          changeOrigin: true,
-          secure: false,
-          headers: {
-            origin: env.VITE_JIRA_BASE_URL,
-          }
-        },
-      },
-    }
   }
-})
+});
