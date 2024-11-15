@@ -9,7 +9,6 @@ interface RoleSliderProps {
     setRole: (role: Role) => void;
 }
 
-
 const RoleSlider: React.FC<RoleSliderProps> = ({ role, setRole }) => {
     return (
         <div className="flex items-center space-x-3">
