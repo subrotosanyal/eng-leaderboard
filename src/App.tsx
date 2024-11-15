@@ -9,6 +9,7 @@ import type { ChartData, Engineer, JiraConfig, Sprint, TimeframeOption } from '.
 import { config } from './config/env';
 import TeamStats from './components/TeamStats';
 import MockDataStrip from './components/MockDataStrip';
+import SearchBar from './components/SearchBar';
 
 function App() {
     const loadConfig = (): JiraConfig => {
@@ -51,21 +52,21 @@ function App() {
                     type: 'sprint'
                 };
                 setSelectedTimeframe(initialTimeframe);
-
-                setIsMockData(!(
-                    config.jira.baseUrl &&
-                    config.jira.apiToken &&
-                    config.jira.email &&
-                    jiraConfig.project &&
-                    jiraConfig.board &&
-                    jiraConfig.developerField &&
-                    jiraConfig.storyPointField
-                ));
             } catch (err) {
                 setError('Failed to fetch sprints. Please check your JIRA configuration.');
                 console.error('Error fetching sprints:', err);
             }
         };
+
+        setIsMockData(!(
+            config.jira.baseUrl &&
+            config.jira.apiToken &&
+            config.jira.email &&
+            jiraConfig.project &&
+            jiraConfig.board &&
+            jiraConfig.developerField &&
+            jiraConfig.storyPointField
+        ));
 
         initializeData();
     }, [jiraConfig]);
@@ -138,15 +139,7 @@ function App() {
                     </div>
                 </div>
 
-                <div className="mb-4">
-                    <input
-                        type="text"
-                        placeholder="Search developers..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        className="border p-2 rounded w-full"
-                    />
-                </div>
+                <SearchBar search={search} setSearch={setSearch} />
 
                 <MockDataStrip isMockData={isMockData} />
 
