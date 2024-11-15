@@ -7,8 +7,9 @@ import {config} from "../config/env.ts";
 
 export class JiraService {
     private readonly isConfigured: boolean;
+    private setIsMockData: (isMock: boolean) => void;
 
-    constructor(private jiraConfig: JiraConfig) {
+    constructor(private jiraConfig: JiraConfig, setIsMockData: (isMock: boolean) => void) {
         this.isConfigured = Boolean(
             jiraConfig.project &&
             jiraConfig.board &&
@@ -18,9 +19,10 @@ export class JiraService {
             config.jira.email &&
             config.jira.apiToken
         );
-
+        this.setIsMockData = setIsMockData;
         if (!this.isConfigured) {
             console.warn('JIRA configuration is incomplete. Using mock data instead.');
+            this.setIsMockData(true);
         }
     }
 
@@ -61,6 +63,7 @@ export class JiraService {
             return sprints;
         } catch (error) {
             console.error('Failed to fetch sprints:', error);
+            this.setIsMockData(true);
             return mockSprints;
         }
     }
@@ -90,6 +93,7 @@ export class JiraService {
         } catch (error) {
             console.error('Failed to fetch JIRA data:', error);
             console.warn('Falling back to mock data');
+            this.setIsMockData(true);
             return mockTimeframeStats[timeframe.type];
         }
     }

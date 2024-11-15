@@ -7,8 +7,8 @@ interface TeamStatsProps {
 }
 
 const TeamStats: React.FC<TeamStatsProps> = ({ developers }) => {
-  const totalStoryPoints = developers.reduce((sum, dev) => sum + dev.storyPoints, 0);
-  const totalTickets = developers.reduce((sum, dev) => sum + dev.ticketsClosed, 0);
+  const totalStoryPoints = Math.round(developers.reduce((sum, dev) => sum + dev.storyPoints, 0));
+  const totalTickets = Math.round(developers.reduce((sum, dev) => sum + dev.ticketsClosed, 0));
 
   return (
     <div className="bg-white p-6 rounded-xl shadow-lg">
