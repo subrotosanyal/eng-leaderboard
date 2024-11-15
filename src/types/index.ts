@@ -57,3 +57,8 @@ export interface JiraConfig {
   storyPointField: string;
   testedByField: string;
 }
+
+export enum Role {
+  Developer = 'Developer',
+  QA = 'QA'
+}

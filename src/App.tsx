@@ -5,11 +5,13 @@ import PerformanceChart from './components/PerformanceChart';
 import TimeframeSelector from './components/TimeframeSelector';
 import ConfigDialog from './components/ConfigDialog';
 import { JiraService } from './services/jiraService';
+import { Role } from './types';
 import type { ChartData, Engineer, JiraConfig, Sprint, TimeframeOption } from './types';
 import { config } from './config/env';
 import TeamStats from './components/TeamStats';
 import MockDataStrip from './components/MockDataStrip';
 import SearchBar from './components/SearchBar';
+import RoleSlider from './components/RoleSlider';
 
 function App() {
     const loadConfig = (): JiraConfig => {
@@ -36,6 +38,7 @@ function App() {
     const [search, setSearch] = useState('');
     const [isConfigDialogOpen, setIsConfigDialogOpen] = useState(false);
     const [jiraConfig, setJiraConfig] = useState<JiraConfig>(loadConfig);
+    const [role, setRole] = useState<Role>(Role.Developer);
 
     useEffect(() => {
         const initializeData = async () => {
@@ -79,7 +82,7 @@ function App() {
                 setLoading(true);
                 setError(null);
                 const jiraService = new JiraService(jiraConfig, setIsMockData);
-                const data = await jiraService.getTimeframeData(selectedTimeframe);
+                const data = await jiraService.getTimeframeData(selectedTimeframe, role);
                 setDevelopers(data);
             } catch (err) {
                 setError('Failed to fetch leaderboard data. Please check your JIRA configuration.');
@@ -90,7 +93,7 @@ function App() {
         };
 
         fetchTimeframeData();
-    }, [selectedTimeframe, jiraConfig]);
+    }, [selectedTimeframe, jiraConfig, role]);
 
     const getChartData = (): ChartData[] => {
         return developers.map(dev => ({
@@ -138,6 +141,8 @@ function App() {
                               onClick={() => setIsConfigDialogOpen(true)}/>
                     </div>
                 </div>
+
+                <RoleSlider role={role} setRole={setRole} />
 
                 <SearchBar search={search} setSearch={setSearch} />
 

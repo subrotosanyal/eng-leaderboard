@@ -1,9 +1,10 @@
 import api from './api';
-import {queries} from './jiraQueries';
-import {isAfter, subMonths} from 'date-fns';
-import type {Assignee, Engineer, Issue, JiraConfig, Sprint, TimeframeOption} from '../types';
-import {mockSprints, mockTimeframeStats} from '../mocks/data';
-import {config} from "../config/env.ts";
+import { queries } from './jiraQueries';
+import { isAfter, subMonths } from 'date-fns';
+import type { Assignee, Engineer, Issue, JiraConfig, Sprint, TimeframeOption } from '../types';
+import { mockSprints, mockTimeframeStats } from '../mocks/data';
+import { config } from "../config/env";
+import { Role } from '../types';
 
 export class JiraService {
     private readonly isConfigured: boolean;
@@ -67,7 +68,7 @@ export class JiraService {
         }
     }
 
-    async getTimeframeData(timeframe: TimeframeOption): Promise<Engineer[]> {
+    async getTimeframeData(timeframe: TimeframeOption, role: Role): Promise<Engineer[]> {
         if (!this.isConfigured) {
             return mockTimeframeStats[timeframe.type];
         }
@@ -88,7 +89,7 @@ export class JiraService {
             }
 
             const issues = await this.fetchIssues(jql);
-            return this.processIssues(issues);
+            return this.processIssues(issues, role);
         } catch (error) {
             console.error('Failed to fetch JIRA data:', error);
             console.warn('Falling back to mock data');
@@ -127,7 +128,7 @@ export class JiraService {
         return issues;
     }
 
-    private processIssues(issues: Issue[]): Engineer[] {
+    private processIssues(issues: Issue[], role: Role): Engineer[] {
         const devMap = new Map<string, {
             id: string;
             name: string;
@@ -140,7 +141,8 @@ export class JiraService {
         }>();
 
         issues.forEach(issue => {
-            const developers: Assignee[] = issue.fields[this.jiraConfig.developerField] as Assignee[] || [];
+            const field = role === Role.Developer ? this.jiraConfig.developerField : this.jiraConfig.testedByField;
+            const developers: Assignee[] = issue.fields[field] as Assignee[] || [];
             const assignee: Assignee | null = issue.fields.assignee;
 
             const assignedDevelopers = developers.length > 0 ? developers : (assignee ? [assignee] : []);
