@@ -35,7 +35,7 @@ function App() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isMockData, setIsMockData] = useState(false);
-    const [search, setSearch] = useState('');
+    const [selectedNames, setSelectedNames] = useState<{ name: string; avatar: string }[]>([]);
     const [isConfigDialogOpen, setIsConfigDialogOpen] = useState(false);
     const [jiraConfig, setJiraConfig] = useState<JiraConfig>(loadConfig);
     const [role, setRole] = useState<Role>(Role.Developer);
@@ -84,6 +84,7 @@ function App() {
                 const jiraService = new JiraService(jiraConfig, setIsMockData);
                 const data = await jiraService.getTimeframeData(selectedTimeframe, role);
                 setDevelopers(data);
+                setSelectedNames(data.map(dev => ({ name: dev.name, avatar: dev.avatar })));
             } catch (err) {
                 setError('Failed to fetch leaderboard data. Please check your JIRA configuration.');
                 console.error('Error fetching JIRA data:', err);
@@ -104,7 +105,7 @@ function App() {
     };
 
     const filteredDevelopers = developers.filter(dev =>
-        dev.name !== null && dev.name.toLowerCase().includes(search.toLowerCase())
+        selectedNames.some(selected => selected.name === dev.name)
     );
 
     const handleConfigSave = (newConfig: typeof jiraConfig) => {
@@ -144,7 +145,11 @@ function App() {
 
                 <RoleSlider role={role} setRole={setRole} />
 
-                <SearchBar search={search} setSearch={setSearch} />
+                <SearchBar
+                    engineers={developers.map(dev => ({ name: dev.name, avatar: dev.avatar }))}
+                    selectedNames={selectedNames}
+                    setSelectedNames={setSelectedNames}
+                />
 
                 <MockDataStrip isMockData={isMockData} />
 
@@ -161,7 +166,7 @@ function App() {
                                     key={developer.id}
                                     developer={developer}
                                     rank={index + 1}
-                                    tickets={[]} // Pass the appropriate tickets array here
+                                    tickets={developer.issues}
                                 />
                             ))}
                         </div>
