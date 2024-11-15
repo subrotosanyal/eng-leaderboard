@@ -13,7 +13,6 @@ export class JiraService {
         this.isConfigured = Boolean(
             jiraConfig.project &&
             jiraConfig.board &&
-            jiraConfig.developerField &&
             jiraConfig.storyPointField &&
             config.jira.baseUrl &&
             config.jira.email &&
@@ -99,12 +98,33 @@ export class JiraService {
     }
 
     private async fetchIssues(jql: string): Promise<Issue[]> {
-        const response = await api.post('/rest/api/3/search', {
-            jql,
-            fields: ['assignee', this.jiraConfig.storyPointField, this.jiraConfig.developerField, 'customfield_10110', 'status', 'updated'],
-            maxResults: 100
-        });
-        return response.data.issues as Issue[];
+        const fields = ['assignee', 'status', 'updated'];
+        if (this.jiraConfig.storyPointField) fields.push(this.jiraConfig.storyPointField);
+        if (this.jiraConfig.developerField) fields.push(this.jiraConfig.developerField);
+        if (this.jiraConfig.testedByField) fields.push(this.jiraConfig.testedByField);
+
+        const issues: Issue[] = [];
+        let startAt = 0;
+        const maxResults = 100;
+
+        while (true) {
+            const response = await api.post('/rest/api/3/search', {
+                jql,
+                fields,
+                startAt,
+                maxResults
+            });
+
+            issues.push(...response.data.issues);
+
+            if (response.data.issues.length < maxResults) {
+                break;
+            }
+
+            startAt += maxResults;
+        }
+
+        return issues;
     }
 
     private processIssues(issues: Issue[]): Engineer[] {
