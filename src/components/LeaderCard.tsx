@@ -1,6 +1,7 @@
 import {Medal, Trophy} from 'lucide-react';
 import type {Engineer, Issue} from '../types';
 import {config} from '../config/env';
+import React from "react";
 
 interface LeaderCardProps {
     developer: Engineer;
