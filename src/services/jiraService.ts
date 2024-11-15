@@ -7,7 +7,7 @@ import {config} from "../config/env.ts";
 
 export class JiraService {
     private readonly isConfigured: boolean;
-    private setIsMockData: (isMock: boolean) => void;
+    private readonly setIsMockData: (isMock: boolean) => void;
 
     constructor(private jiraConfig: JiraConfig, setIsMockData: (isMock: boolean) => void) {
         this.isConfigured = Boolean(
