@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
-import { Layout, Menu, Users } from 'lucide-react';
+import { Layout, Menu } from 'lucide-react';
 import LeaderCard from './components/LeaderCard';
 import PerformanceChart from './components/PerformanceChart';
 import TimeframeSelector from './components/TimeframeSelector';
 import ConfigDialog from './components/ConfigDialog';
 import { JiraService } from './services/jiraService';
-import type { ChartData, Developer, JiraConfig, Sprint, TimeframeOption } from './types';
+import type { ChartData, Engineer, JiraConfig, Sprint, TimeframeOption } from './types';
 import { config } from './config/env';
+import TeamStats from './components/TeamStats';
 
 function App() {
     const loadConfig = (): JiraConfig => {
@@ -15,6 +16,7 @@ function App() {
             board: localStorage.getItem('jiraBoard') || '',
             developerField: localStorage.getItem('jiraDeveloperField') || '',
             storyPointField: localStorage.getItem('jiraStoryPointField') || '',
+            testedByField: localStorage.getItem('jiraTestedByField') || '',
         };
     };
 
@@ -25,7 +27,7 @@ function App() {
         value: '',
         type: 'sprint'
     });
-    const [developers, setDevelopers] = useState<Developer[]>([]);
+    const [developers, setDevelopers] = useState<Engineer[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isMockData, setIsMockData] = useState(false);
@@ -188,26 +190,7 @@ function App() {
                                 data={getChartData()}
                                 title="Story Points vs Tickets Closed"
                             />
-                            <div className="bg-white p-6 rounded-xl shadow-lg">
-                                <div className="flex items-center space-x-2 mb-4">
-                                    <Users className="w-6 h-6 text-indigo-600"/>
-                                    <h2 className="text-xl font-bold text-gray-800">Team Stats</h2>
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="bg-indigo-50 p-4 rounded-lg">
-                                        <p className="text-sm text-indigo-600 mb-1">Total Story Points</p>
-                                        <p className="text-2xl font-bold text-indigo-900">
-                                            {developers.reduce((sum, dev) => sum + dev.storyPoints, 0)}
-                                        </p>
-                                    </div>
-                                    <div className="bg-purple-50 p-4 rounded-lg">
-                                        <p className="text-sm text-purple-600 mb-1">Total Tickets</p>
-                                        <p className="text-2xl font-bold text-purple-900">
-                                            {developers.reduce((sum, dev) => sum + dev.ticketsClosed, 0)}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
+                            <TeamStats developers={developers} />
                         </div>
                     </>
                 )}

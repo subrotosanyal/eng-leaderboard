@@ -1,4 +1,3 @@
-// src/components/ConfigDialog.tsx
 import React, { useState } from 'react';
 import type { JiraConfig } from '../types';
 
@@ -22,8 +21,8 @@ const ConfigDialog: React.FC<ConfigDialogProps> = ({ isOpen, onClose, onSave, in
     localStorage.setItem('jiraBoard', config.board);
     localStorage.setItem('jiraStoryPointField', config.storyPointField);
     localStorage.setItem('jiraDeveloperField', config.developerField);
+    localStorage.setItem('jiraTestedByField', config.testedByField); // Add this line
     localStorage.setItem('jiraProject', config.project);
-    window.location.reload(); // Reload the page to apply the changes
     onClose();
   };
 
@@ -69,6 +68,16 @@ const ConfigDialog: React.FC<ConfigDialogProps> = ({ isOpen, onClose, onSave, in
             type="text"
             name="storyPointField"
             value={config.storyPointField}
+            onChange={handleChange}
+            className="border p-2 rounded w-full"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-gray-700">Tested By Field Name</label> {/* Add this block */}
+          <input
+            type="text"
+            name="testedByField"
+            value={config.testedByField}
             onChange={handleChange}
             className="border p-2 rounded w-full"
           />

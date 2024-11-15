@@ -24,7 +24,7 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({ options = [], selected,
         {selected.label}
       </div>
       {isOpen && (
-        <div className="absolute mt-1 w-full bg-white border rounded shadow-lg z-10">
+        <div className="absolute mt-1 w-full bg-white border rounded shadow-lg z-10 max-h-60 overflow-y-auto"> {/* Add max-h-60 and overflow-y-auto */}
           <input
             type="text"
             placeholder="Search..."

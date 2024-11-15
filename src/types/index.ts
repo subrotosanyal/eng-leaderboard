@@ -5,7 +5,7 @@ export interface Sprint {
   endDate: string;
 }
 
-export interface Developer {
+export interface Engineer {
   id: string;
   name: string;
   avatar: string;
@@ -17,9 +17,9 @@ export interface Developer {
 }
 
 export interface TimeframeStats {
-  sprint: Developer[];
-  week: Developer[];
-  month: Developer[];
+  sprint: Engineer[];
+  week: Engineer[];
+  month: Engineer[];
 }
 
 export interface ChartData {
@@ -55,4 +55,5 @@ export interface JiraConfig {
   board: string;
   developerField: string;
   storyPointField: string;
+  testedByField: string;
 }

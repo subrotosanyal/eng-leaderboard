@@ -1,6 +1,6 @@
-import type { Developer, TimeframeStats, Sprint } from '../types';
+import type { Engineer, TimeframeStats, Sprint } from '../types';
 
-const mockDevelopers: Developer[] = [
+const mockDevelopers: Engineer[] = [
   {
     id: '1',
     name: 'Sarah Johnson',
