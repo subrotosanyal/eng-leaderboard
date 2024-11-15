@@ -71,7 +71,7 @@ function App() {
             jiraConfig.storyPointField
         ));
 
-        initializeData();
+        initializeData().catch(err => console.error('Error in initializeData:', err));
     }, [jiraConfig]);
 
     useEffect(() => {
@@ -93,7 +93,7 @@ function App() {
             }
         };
 
-        fetchTimeframeData();
+        fetchTimeframeData().catch(err => console.error('Error in fetchTimeframeData:', err));
     }, [selectedTimeframe, jiraConfig, role]);
 
     const getChartData = (): ChartData[] => {

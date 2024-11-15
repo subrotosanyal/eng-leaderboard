@@ -8,7 +8,8 @@ const mockDevelopers: Engineer[] = [
     storyPoints: 34,
     ticketsClosed: 12,
     trend: 2,
-    rank: 1
+    rank: 1,
+    issues: []
   },
   {
     id: '2',
@@ -17,7 +18,8 @@ const mockDevelopers: Engineer[] = [
     storyPoints: 28,
     ticketsClosed: 15,
     trend: -1,
-    rank: 2
+    rank: 2,
+    issues: []
   },
   {
     id: '3',
@@ -26,7 +28,8 @@ const mockDevelopers: Engineer[] = [
     storyPoints: 25,
     ticketsClosed: 10,
     trend: 1,
-    rank: 3
+    rank: 3,
+    issues: []
   },
   {
     id: '4',
@@ -35,7 +38,8 @@ const mockDevelopers: Engineer[] = [
     storyPoints: 22,
     ticketsClosed: 8,
     trend: 0,
-    rank: 4
+    rank: 4,
+    issues: []
   }
 ];
 
