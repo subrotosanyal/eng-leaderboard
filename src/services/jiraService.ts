@@ -86,6 +86,15 @@ export class JiraService {
                 case 'month':
                     jql = queries.monthlyIssues(timeframe.value, this.jiraConfig);
                     break;
+                case 'quarter':
+                    jql = queries.quarterlyIssues(timeframe.value, this.jiraConfig);
+                    break;
+                case 'half-year':
+                    jql = queries.halfYearlyIssues(timeframe.value, this.jiraConfig);
+                    break;
+                case 'year':
+                    jql = queries.yearlyIssues(timeframe.value, this.jiraConfig);
+                    break;
             }
 
             const issues = await this.fetchIssues(jql);
@@ -99,7 +108,7 @@ export class JiraService {
     }
 
     private async fetchIssues(jql: string): Promise<Issue[]> {
-        const fields = ['assignee', 'status', 'updated'];
+        const fields = ['assignee', 'status', 'updated', 'issuetype'];
         if (this.jiraConfig.storyPointField) fields.push(this.jiraConfig.storyPointField);
         if (this.jiraConfig.developerField) fields.push(this.jiraConfig.developerField);
         if (this.jiraConfig.testedByField) fields.push(this.jiraConfig.testedByField);
@@ -138,6 +147,7 @@ export class JiraService {
             previousRank?: number;
             ticketKeys: string[];
             issues: Issue[];
+            issueTypeCount: Map<string, number>;
         }>();
 
         issues.forEach(issue => {
@@ -160,13 +170,18 @@ export class JiraService {
                     storyPoints: 0,
                     ticketsClosed: 0,
                     ticketKeys: [],
-                    issues: []
+                    issues: [],
+                    issueTypeCount: new Map<string, number>()
                 };
 
                 devData.storyPoints = Number((devData.storyPoints + storyPointsPerDeveloper).toFixed(1));
                 devData.ticketsClosed += 1;
                 devData.ticketKeys.push(issue.key);
                 devData.issues.push(issue);
+
+                const issueTypeName = issue.fields.issuetype.name;
+                const currentCount = devData.issueTypeCount.get(issueTypeName) || 0;
+                devData.issueTypeCount.set(issueTypeName, currentCount + 1);
 
                 devMap.set(developer.accountId, devData);
             });

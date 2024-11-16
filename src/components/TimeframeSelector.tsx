@@ -1,7 +1,7 @@
 import React from 'react';
 import CustomDropdown from './CustomDropdown';
 import type { TimeframeOption, Sprint } from '../types';
-import { format, startOfWeek, endOfWeek, startOfMonth, subWeeks, subMonths } from 'date-fns';
+import { format, startOfWeek, endOfWeek, startOfMonth, subWeeks, subMonths, startOfQuarter, subQuarters, startOfYear, subYears } from 'date-fns';
 
 interface TimeframeSelectorProps {
   selected: TimeframeOption;
@@ -40,10 +40,43 @@ const TimeframeSelector: React.FC<TimeframeSelectorProps> = ({ selected, sprints
     };
   });
 
+  const quarterOptions = Array.from({ length: 4 }, (_, i) => {
+    const date = startOfQuarter(subQuarters(currentDate, i));
+    return {
+      id: `quarter-${i + 1}`,
+      label: `Q${i + 1} ${format(date, 'yyyy')}`,
+      value: format(date, 'yyyy-MM-dd'),
+      type: 'quarter' as const
+    };
+  });
+
+  const halfYearOptions = Array.from({ length: 2 }, (_, i) => {
+    const date = startOfMonth(subMonths(currentDate, i * 6));
+    return {
+      id: `half-year-${i + 1}`,
+      label: `H${i + 1} ${format(date, 'yyyy')}`,
+      value: format(date, 'yyyy-MM-dd'),
+      type: 'half-year' as const
+    };
+  });
+
+  const yearOptions = Array.from({ length: 2 }, (_, i) => {
+    const date = startOfYear(subYears(currentDate, i));
+    return {
+      id: `year-${i + 1}`,
+      label: format(date, 'yyyy'),
+      value: format(date, 'yyyy-MM-dd'),
+      type: 'year' as const
+    };
+  });
+
   const options: TimeframeOption[] = [
     ...sprintOptions,
     ...weekOptions,
-    ...monthOptions
+    ...monthOptions,
+    ...quarterOptions,
+    ...halfYearOptions,
+    ...yearOptions
   ];
 
   return (

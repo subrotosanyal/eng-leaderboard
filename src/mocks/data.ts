@@ -9,7 +9,8 @@ const mockDevelopers: Engineer[] = [
     ticketsClosed: 12,
     trend: 2,
     rank: 1,
-    issues: []
+    issues: [],
+    issueTypeCount: new Map<string, number>()
   },
   {
     id: '2',
@@ -19,7 +20,8 @@ const mockDevelopers: Engineer[] = [
     ticketsClosed: 15,
     trend: -1,
     rank: 2,
-    issues: []
+    issues: [],
+    issueTypeCount: new Map<string, number>()
   },
   {
     id: '3',
@@ -29,7 +31,8 @@ const mockDevelopers: Engineer[] = [
     ticketsClosed: 10,
     trend: 1,
     rank: 3,
-    issues: []
+    issues: [],
+    issueTypeCount: new Map<string, number>()
   },
   {
     id: '4',
@@ -39,7 +42,8 @@ const mockDevelopers: Engineer[] = [
     ticketsClosed: 8,
     trend: 0,
     rank: 4,
-    issues: []
+    issues: [],
+    issueTypeCount: new Map<string, number>()
   }
 ];
 
@@ -75,5 +79,20 @@ export const mockTimeframeStats: TimeframeStats = {
     ...dev,
     storyPoints: dev.storyPoints * 2,
     ticketsClosed: dev.ticketsClosed * 2
+  })),
+  quarter: mockDevelopers.map(dev => ({
+    ...dev,
+    storyPoints: dev.storyPoints * 3,
+    ticketsClosed: dev.ticketsClosed * 3
+  })),
+  'half-year': mockDevelopers.map(dev => ({
+    ...dev,
+    storyPoints: dev.storyPoints * 6,
+    ticketsClosed: dev.ticketsClosed * 6
+  })),
+  year: mockDevelopers.map(dev => ({
+    ...dev,
+    storyPoints: dev.storyPoints * 12,
+    ticketsClosed: dev.ticketsClosed * 12
   }))
 };

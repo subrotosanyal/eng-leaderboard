@@ -4,6 +4,7 @@ import { config } from '../config/env';
 import React from 'react';
 import { commonStyle } from './styles/commonStyles';
 import Card from './Card';
+import { Tooltip } from 'react-tooltip';
 import StatCard from './StatCard';
 
 interface LeaderCardProps {
@@ -34,6 +35,12 @@ const LeaderCard: React.FC<LeaderCardProps> = ({ developer, rank }) => {
     window.open(url, '_blank');
   };
 
+  const issueTypeSummary = Array.from(developer.issueTypeCount.entries())
+    .map(([issueType, count]) => {
+      const iconUrl = developer.issues.find(issue => issue.fields.issuetype.name === issueType)?.fields.issuetype.iconUrl;
+      return { issueType, count, iconUrl };
+    });
+
   return (
     <Card
       title={developer.name}
@@ -56,9 +63,6 @@ const LeaderCard: React.FC<LeaderCardProps> = ({ developer, rank }) => {
         <div>
           <div className="flex items-center space-x-2 text-gray-600" style={commonStyle}>
             <span className="text-sm">#{rank}</span>
-            {/*<span className={`text-sm ${developer.trend > 0 ? 'text-green-500' : 'text-red-500'}`}>*/}
-            {/*  {developer.trend > 0 ? '↑' : '↓'} {Math.abs(developer.trend)}*/}
-            {/*</span>*/}
           </div>
         </div>
       </div>
@@ -73,6 +77,19 @@ const LeaderCard: React.FC<LeaderCardProps> = ({ developer, rank }) => {
           value={developer.ticketsClosed}
           onClick={handleLinkClick}
         />
+        <div data-tooltip-id={`issueTypeTooltip-${developer.id}`} className="cursor-pointer">
+          <p className="text-sm font-medium" style={{ color: 'var(--stat-card-text)' }}>Issue Types</p>
+        </div>
+        <Tooltip id={`issueTypeTooltip-${developer.id}`} place="top">
+          <div className="flex flex-col">
+            {issueTypeSummary.map(({ issueType, count, iconUrl }) => (
+              <div key={issueType} className="flex items-center space-x-2">
+                {iconUrl && <img src={iconUrl} alt={issueType} className="w-4 h-4" />}
+                <span>{issueType}: {count}</span>
+              </div>
+            ))}
+          </div>
+        </Tooltip>
       </div>
     </Card>
   );
