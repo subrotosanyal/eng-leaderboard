@@ -2,27 +2,30 @@ import React from 'react';
 import Toggle from 'react-toggle';
 import 'react-toggle/style.css';
 import { Role } from '../types';
-import { FaSearch, FaHammer } from 'react-icons/fa';
+import { Wrench , Search } from 'lucide-react';
 
 interface RoleSliderProps {
-    role: Role;
-    setRole: (role: Role) => void;
+  role: Role;
+  setRole: (role: Role) => void;
 }
 
 const RoleSlider: React.FC<RoleSliderProps> = ({ role, setRole }) => {
-    return (
-        <div className="flex items-center space-x-3">
-            <Toggle
-                checked={role === Role.QA}
-                onChange={() => setRole(role === Role.Developer ? Role.QA : Role.Developer)}
-                icons={{
-                    checked: <FaSearch />,
-                    unchecked: <FaHammer />
-                }}
-                className="custom-toggle"
-            />
-        </div>
-    );
+  const isDeveloper = role === Role.Developer;
+
+  return (
+    <div className="flex items-center mb-4">
+      <div className="relative" title={isDeveloper ? 'Developer' : 'QA'}>
+        <Toggle
+          defaultChecked={isDeveloper}
+          icons={{
+            checked: <Wrench className="w-4 h-4" />,
+            unchecked: <Search className="w-4 h-4" />
+          }}
+          onChange={() => setRole(isDeveloper ? Role.QA : Role.Developer)}
+        />
+      </div>
+    </div>
+  );
 };
 
 export default RoleSlider;

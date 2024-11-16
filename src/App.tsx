@@ -143,13 +143,15 @@ function App() {
                     </div>
                 </div>
 
-                <RoleSlider role={role} setRole={setRole} />
+                <div className="mb-4">
+                    <SearchBar
+                        engineers={developers.map(dev => ({ name: dev.name, avatar: dev.avatar }))}
+                        selectedNames={selectedNames}
+                        setSelectedNames={setSelectedNames}
+                    />
+                </div>
 
-                <SearchBar
-                    engineers={developers.map(dev => ({ name: dev.name, avatar: dev.avatar }))}
-                    selectedNames={selectedNames}
-                    setSelectedNames={setSelectedNames}
-                />
+                <RoleSlider role={role} setRole={setRole} />
 
                 <MockDataStrip isMockData={isMockData} />
 
