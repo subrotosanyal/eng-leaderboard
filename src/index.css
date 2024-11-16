@@ -1,3 +1,4 @@
+/* index.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -27,7 +28,7 @@
     --stat-card-value: var(--stat-card-value-dark);
 }
 
-.light-mode {
+.light {
     --stat-card-bg: var(--stat-card-bg-light);
     --stat-card-text: var(--stat-card-text-light);
     --stat-card-value: var(--stat-card-value-light);

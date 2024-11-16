@@ -129,16 +129,14 @@ function App() {
     return (
         <ThemeProvider>
             <div className="min-h-screen bg-gray-100" style={commonStyle}>
-                <header className="flex justify-end p-4">
-                    <ThemeSwitcher/>
-                </header>
                 <div className="min-h-screen bg-gray-100" style={commonStyle}>
                     <div className="container mx-auto px-4 py-8">
                         <div className="flex items-center justify-between mb-8">
                             <div className="flex items-center space-x-3">
                                 <Layout className="w-8 h-8 text-indigo-600"/>
-                                <h1 className="text-2xl font-bold">Developer Leaderboard</h1>
+                                <h1 className="text-2xl font-bold">Engineering Leaderboard</h1>
                             </div>
+                            <ThemeSwitcher/>
                             <div className="flex items-center space-x-3">
                                 <TimeframeSelector
                                     selected={selectedTimeframe}
@@ -170,7 +168,7 @@ function App() {
                             </div>
                         ) : (
                             <>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 lg:grid-cols-4 lg:grid-cols-5 gap-6 mb-8">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
                                     {filteredDevelopers.map((developer, index) => (
                                         <LeaderCard
                                             key={developer.id}
