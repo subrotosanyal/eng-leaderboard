@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import {commonStyle} from "./styles/commonStyles.ts";
 
 interface SearchBarProps {
   engineers: { name: string; avatar: string }[];
@@ -31,16 +32,17 @@ const SearchBar: React.FC<SearchBarProps> = ({ engineers, selectedNames, setSele
   };
 
   return (
-    <div className="mb-4">
+    <div className="mb-4" style={commonStyle}>
       <input
         type="text"
         placeholder="Search for an engineer..."
         value={search}
         onChange={handleSearchChange}
         className="border p-2 rounded w-full"
+        style={commonStyle}
       />
       {results.length > 0 && (
-        <div className="border mt-2 rounded bg-white shadow-lg">
+        <div className="border mt-2 rounded bg-white shadow-lg" style={commonStyle}>
           {results.map(engineer => (
             <div
               key={engineer.name}
@@ -60,9 +62,9 @@ const SearchBar: React.FC<SearchBarProps> = ({ engineers, selectedNames, setSele
       )}
       <div className="mt-2 flex flex-wrap">
         {selectedNames.map(({ name, avatar }) => (
-          <div key={name} className="bg-blue-200 text-blue-800 rounded-full px-3 py-1 m-1 flex items-center" title={name}>
+          <div key={name} className="bg-blue-200 text-blue-800 rounded-full px-3 py-1 m-1 flex items-center" style={commonStyle} title={name}>
             <img src={avatar} alt={name} className="w-6 h-6 rounded-full mr-2" />
-            <button onClick={() => setSelectedNames(selectedNames.filter(n => n.name !== name))} className="ml-2 text-red-500">✕</button>
+            <button onClick={() => setSelectedNames(selectedNames.filter(n => n.name !== name))} style={commonStyle} className="ml-2 text-red-500">✕</button>
           </div>
         ))}
       </div>

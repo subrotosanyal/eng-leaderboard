@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import type { TimeframeOption } from '../types';
+import {commonStyle} from "./styles/commonStyles.ts";
 
 interface CustomDropdownProps {
   options: TimeframeOption[];
@@ -16,7 +17,7 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({ options = [], selected,
   );
 
   return (
-    <div className="relative w-64"> {/* Adjust the width here */}
+    <div className="relative w-64" style={commonStyle}> {/* Adjust the width here */}
       <div
         className="border p-2 rounded cursor-pointer"
         onClick={() => setIsOpen(!isOpen)}
@@ -31,6 +32,7 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({ options = [], selected,
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="border-b p-2 w-full"
+            style={commonStyle}
           />
           {filteredOptions.map(option => (
             <div
@@ -40,6 +42,7 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({ options = [], selected,
                 onChange(option);
                 setIsOpen(false);
               }}
+              style={commonStyle}
             >
               {option.label}
             </div>

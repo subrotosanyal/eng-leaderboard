@@ -12,6 +12,9 @@ import TeamStats from './components/TeamStats';
 import MockDataStrip from './components/MockDataStrip';
 import SearchBar from './components/SearchBar';
 import RoleSlider from './components/RoleSlider';
+import { ThemeProvider } from './context/ThemeContext';
+import ThemeSwitcher from './components/ThemeSwitcher';
+import {commonStyle} from "./components/styles/commonStyles.ts";
 
 function App() {
     const loadConfig = (): JiraConfig => {
@@ -124,72 +127,79 @@ function App() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-100">
-            <div className="container mx-auto px-4 py-8">
-                <div className="flex items-center justify-between mb-8">
-                    <div className="flex items-center space-x-3">
-                        <Layout className="w-8 h-8 text-indigo-600"/>
-                        <h1 className="text-2xl font-bold text-gray-800">Developer Leaderboard</h1>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                        <TimeframeSelector
-                            selected={selectedTimeframe}
-                            sprints={sprints}
-                            onChange={setSelectedTimeframe}
-                            isLoading={loading}
-                        />
-                        <Menu className="w-8 h-8 text-indigo-600 cursor-pointer"
-                              onClick={() => setIsConfigDialogOpen(true)}/>
-                    </div>
-                </div>
+        <ThemeProvider>
+            <div className="min-h-screen bg-gray-100" style={commonStyle}>
+                <header className="flex justify-end p-4">
+                    <ThemeSwitcher/>
+                </header>
+                <div className="min-h-screen bg-gray-100" style={commonStyle}>
+                    <div className="container mx-auto px-4 py-8">
+                        <div className="flex items-center justify-between mb-8">
+                            <div className="flex items-center space-x-3">
+                                <Layout className="w-8 h-8 text-indigo-600"/>
+                                <h1 className="text-2xl font-bold">Developer Leaderboard</h1>
+                            </div>
+                            <div className="flex items-center space-x-3">
+                                <TimeframeSelector
+                                    selected={selectedTimeframe}
+                                    sprints={sprints}
+                                    onChange={setSelectedTimeframe}
+                                    isLoading={loading}
+                                />
+                                <Menu className="w-8 h-8 text-indigo-600 cursor-pointer"
+                                      onClick={() => setIsConfigDialogOpen(true)}/>
+                            </div>
+                        </div>
 
-                <div className="mb-4">
-                    <SearchBar
-                        engineers={developers.map(dev => ({ name: dev.name, avatar: dev.avatar }))}
-                        selectedNames={selectedNames}
-                        setSelectedNames={setSelectedNames}
+                        <div className="mb-4">
+                            <SearchBar
+                                engineers={developers.map(dev => ({name: dev.name, avatar: dev.avatar}))}
+                                selectedNames={selectedNames}
+                                setSelectedNames={setSelectedNames}
+                            />
+                        </div>
+
+                        <RoleSlider role={role} setRole={setRole}/>
+
+                        <MockDataStrip isMockData={isMockData}/>
+
+                        {loading ? (
+                            <div className="flex justify-center items-center h-64">
+                                <div
+                                    className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-indigo-500"></div>
+                            </div>
+                        ) : (
+                            <>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 lg:grid-cols-4 lg:grid-cols-5 gap-6 mb-8">
+                                    {filteredDevelopers.map((developer, index) => (
+                                        <LeaderCard
+                                            key={developer.id}
+                                            developer={developer}
+                                            rank={index + 1}
+                                            tickets={developer.issues}
+                                        />
+                                    ))}
+                                </div>
+
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    <PerformanceChart
+                                        data={getChartData()}
+                                        title="Story Points vs Tickets Closed"
+                                    />
+                                    <TeamStats developers={developers}/>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                    <ConfigDialog
+                        isOpen={isConfigDialogOpen}
+                        onClose={() => setIsConfigDialogOpen(false)}
+                        onSave={handleConfigSave}
+                        initialConfig={jiraConfig}
                     />
                 </div>
-
-                <RoleSlider role={role} setRole={setRole} />
-
-                <MockDataStrip isMockData={isMockData} />
-
-                {loading ? (
-                    <div className="flex justify-center items-center h-64">
-                        <div
-                            className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-indigo-500"></div>
-                    </div>
-                ) : (
-                    <>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                            {filteredDevelopers.map((developer, index) => (
-                                <LeaderCard
-                                    key={developer.id}
-                                    developer={developer}
-                                    rank={index + 1}
-                                    tickets={developer.issues}
-                                />
-                            ))}
-                        </div>
-
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <PerformanceChart
-                                data={getChartData()}
-                                title="Story Points vs Tickets Closed"
-                            />
-                            <TeamStats developers={developers} />
-                        </div>
-                    </>
-                )}
             </div>
-            <ConfigDialog
-                isOpen={isConfigDialogOpen}
-                onClose={() => setIsConfigDialogOpen(false)}
-                onSave={handleConfigSave}
-                initialConfig={jiraConfig}
-            />
-        </div>
+        </ThemeProvider>
     );
 }
 

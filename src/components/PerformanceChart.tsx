@@ -1,4 +1,5 @@
 import React from 'react';
+import Card from './Card';
 import {
   BarChart,
   Bar,
@@ -18,8 +19,7 @@ interface PerformanceChartProps {
 
 const PerformanceChart: React.FC<PerformanceChartProps> = ({ data, title }) => {
   return (
-    <div className="bg-white p-6 rounded-xl shadow-lg">
-      <h2 className="text-xl font-bold text-gray-800 mb-4">{title}</h2>
+    <Card title={title}>
       <div className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data}>
@@ -44,7 +44,7 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({ data, title }) => {
           </BarChart>
         </ResponsiveContainer>
       </div>
-    </div>
+    </Card>
   );
 };
 

@@ -1,3 +1,39 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+    --bg-color: #ffffff;
+    --text-color: #000000;
+    --card-bg-light: #ffffff;
+    --card-text-light: #000000;
+    --card-bg-dark: #1f2937;
+    --card-text-dark: #ffffff;
+    --stat-card-bg-light: #f0f4f8;
+    --stat-card-bg-dark: #1a202c;
+    --stat-card-text-light: #5a67d8;
+    --stat-card-text-dark: #a0aec0;
+    --stat-card-value-light: #2a4365;
+    --stat-card-value-dark: #ebf4ff;
+}
+
+.dark {
+    --bg-color: #1a202c;
+    --text-color: #ffffff;
+    --card-bg: var(--card-bg-dark);
+    --card-text: var(--card-text-dark);
+    --stat-card-bg: var(--stat-card-bg-dark);
+    --stat-card-text: var(--stat-card-text-dark);
+    --stat-card-value: var(--stat-card-value-dark);
+}
+
+.light-mode {
+    --stat-card-bg: var(--stat-card-bg-light);
+    --stat-card-text: var(--stat-card-text-light);
+    --stat-card-value: var(--stat-card-value-light);
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
