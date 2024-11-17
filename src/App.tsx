@@ -6,7 +6,7 @@ import TimeframeSelector from './components/TimeframeSelector';
 import ConfigDialog from './components/ConfigDialog';
 import { JiraService } from './services/jiraService';
 import { Role } from './types';
-import type { ChartData, Engineer, JiraConfig, Sprint, TimeframeOption } from './types';
+import type { Engineer, JiraConfig, Sprint, TimeframeOption } from './types';
 import { config } from './config/env';
 import TeamStats from './components/TeamStats';
 import MockDataStrip from './components/MockDataStrip';
@@ -99,14 +99,6 @@ function App() {
         fetchTimeframeData().catch(err => console.error('Error in fetchTimeframeData:', err));
     }, [selectedTimeframe, jiraConfig, role]);
 
-    const getChartData = (): ChartData[] => {
-        return developers.map(dev => ({
-            name: dev.name,
-            storyPoints: dev.storyPoints,
-            ticketsClosed: dev.ticketsClosed
-        }));
-    };
-
     const filteredDevelopers = developers.filter(dev =>
         selectedNames.some(selected => selected.name === dev.name)
     );
@@ -181,8 +173,7 @@ function App() {
 
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                     <PerformanceChart
-                                        data={getChartData()}
-                                        title="Story Points vs Tickets Closed"
+                                        developers={developers}
                                     />
                                     <TeamStats developers={developers}/>
                                 </div>
