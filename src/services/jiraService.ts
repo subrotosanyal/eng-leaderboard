@@ -1,7 +1,14 @@
 import api from './api';
 import { queries } from './jiraQueries';
 import { isAfter, subMonths } from 'date-fns';
-import type { Assignee, Engineer, Issue, JiraConfig, Sprint, TimeframeOption } from '../types';
+import type {
+    Assignee,
+    Engineer,
+    Issue,
+    JiraConfig,
+    Sprint,
+    TimeframeOption,
+} from '../types';
 import { mockSprints, mockTimeframeStats } from '../mocks/data';
 import { config } from "../config/env";
 import { Role } from '../types';
@@ -107,7 +114,7 @@ export class JiraService {
         }
     }
 
-    private async fetchIssues(jql: string): Promise<Issue[]> {
+    async fetchIssues(jql: string): Promise<Issue[]> {
         const fields = ['assignee', 'status', 'updated', 'issuetype'];
         if (this.jiraConfig.storyPointField) fields.push(this.jiraConfig.storyPointField);
         if (this.jiraConfig.developerField) fields.push(this.jiraConfig.developerField);
@@ -137,7 +144,7 @@ export class JiraService {
         return issues;
     }
 
-    private processIssues(issues: Issue[], role: Role): Engineer[] {
+    processIssues(issues: Issue[], role: Role): Engineer[] {
         const devMap = new Map<string, {
             id: string;
             name: string;

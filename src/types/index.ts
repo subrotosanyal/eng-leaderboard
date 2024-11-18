@@ -72,3 +72,29 @@ export enum Role {
     Developer = 'Developer',
     QA = 'QA'
 }
+
+export interface DateRange {
+    start: Date;
+    end: Date;
+}
+
+export interface ComparisonResult {
+    timeframe1: Metrics;
+    timeframe2: Metrics;
+    difference: Metrics;
+}
+
+export interface Metrics {
+    storyPoints: number;
+    ticketsClosed: number;
+    issueTypeDistribution: Record<string, number>; // Ensure this is included and correctly typed
+    averageResolutionTime: number;
+    overallTeamVelocity: number;
+    individualContributions: {
+        name: string;
+        storyPoints: number;
+        ticketsClosed: number;
+        issueTypeDistribution: Record<string, number>;
+        averageResolutionTime: number;
+    }[];
+}
