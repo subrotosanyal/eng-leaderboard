@@ -70,8 +70,8 @@ export enum Role {
 }
 
 export interface DateRange {
-    start: Date;
-    end: Date;
+    start: Date | null;
+    end: Date | null;
 }
 
 export interface ComparisonResult {

@@ -2,13 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { JiraService } from './services/jiraService';
-import { ComparisonResult, DateRange, Role } from './types';
+import { Role } from './types';
 import { config } from './config/env';
-import TimeframeComparison from './components/TimeframeComparison';
-import ComparisonView from './components/ComparisionView';
 import MainPage from './components/MainPage';
 import type { Engineer, JiraConfig, Sprint, TimeframeOption } from './types';
-import {MetricsComparator} from "./services/MetricsComparator.ts";
+import MetricComparisonPage from './components/MetricComparisonPage.tsx';
 
 const App: React.FC = () => {
     const loadConfig = (): JiraConfig => ({
@@ -26,7 +24,6 @@ const App: React.FC = () => {
         value: '',
         type: 'sprint',
     });
-    const [comparisonResult, setComparisonResult] = useState<ComparisonResult | null>(null);
     const [developers, setDevelopers] = useState<Engineer[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -96,13 +93,6 @@ const App: React.FC = () => {
     const handleConfigSave = (newConfig: JiraConfig) => {
         setJiraConfig(newConfig);
     };
-
-    const handleCompare = async (timeframe1: DateRange, timeframe2: DateRange) => {
-        const metricComparator = new MetricsComparator(new JiraService(jiraConfig, setIsMockData), jiraConfig)
-        const result = await metricComparator.compareMetrics(timeframe1, timeframe2, role);
-        setComparisonResult(result);
-    };
-
     if (error) {
         return (
             <div className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -142,10 +132,11 @@ const App: React.FC = () => {
                     <Route
                         path="/comparison"
                         element={
-                            <div>
-                                <TimeframeComparison onCompare={handleCompare} />
-                                {comparisonResult && <ComparisonView result={comparisonResult} />}
-                            </div>
+                            <MetricComparisonPage
+                                jiraConfig={jiraConfig}
+                                role={role}
+                                setIsMockData={setIsMockData}
+                            />
                         }
                     />
                 </Routes>

@@ -8,7 +8,7 @@ interface DateRangeSelectorProps {
     endDate: Date | null;
     setStartDate: (date: Date | null) => void;
     setEndDate: (date: Date | null) => void;
-    onApply: () => void;
+    onApply?: () => void; // Make onApply optional
 }
 
 const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
@@ -42,14 +42,16 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
                     className="border p-2 rounded date-picker"
                 />
             </div>
-            <button
-                onClick={onApply}
-                className="mt-4 px-4 py-2 rounded"
-                disabled={!startDate || !endDate}
-                style={{ backgroundColor: 'var(--button-bg-color)', color: 'var(--button-text-color)' }}
-            >
-                Apply
-            </button>
+            {onApply && (
+                <button
+                    onClick={onApply}
+                    className="mt-4 px-4 py-2 rounded"
+                    disabled={!startDate || !endDate}
+                    style={{ backgroundColor: 'var(--button-bg-color)', color: 'var(--button-text-color)' }}
+                >
+                    Apply
+                </button>
+            )}
         </div>
     );
 };
