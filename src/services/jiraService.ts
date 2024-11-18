@@ -87,20 +87,8 @@ export class JiraService {
                 case 'sprint':
                     jql = queries.sprintIssues(timeframe.value, this.jiraConfig);
                     break;
-                case 'week':
-                    jql = queries.weeklyIssues(timeframe.value, this.jiraConfig);
-                    break;
-                case 'month':
-                    jql = queries.monthlyIssues(timeframe.value, this.jiraConfig);
-                    break;
-                case 'quarter':
-                    jql = queries.quarterlyIssues(timeframe.value, this.jiraConfig);
-                    break;
-                case 'half-year':
-                    jql = queries.halfYearlyIssues(timeframe.value, this.jiraConfig);
-                    break;
-                case 'year':
-                    jql = queries.yearlyIssues(timeframe.value, this.jiraConfig);
+                case 'custom-range':
+                    jql = queries.customDateRange(timeframe.value, this.jiraConfig);
                     break;
             }
 

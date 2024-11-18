@@ -70,29 +70,9 @@ export const mockSprints: Sprint[] = [
 
 export const mockTimeframeStats: TimeframeStats = {
   sprint: mockDevelopers,
-  week: mockDevelopers.map(dev => ({
-    ...dev,
-    storyPoints: Math.floor(dev.storyPoints * 0.7),
-    ticketsClosed: Math.floor(dev.ticketsClosed * 0.8)
-  })),
-  month: mockDevelopers.map(dev => ({
-    ...dev,
-    storyPoints: dev.storyPoints * 2,
-    ticketsClosed: dev.ticketsClosed * 2
-  })),
-  quarter: mockDevelopers.map(dev => ({
-    ...dev,
-    storyPoints: dev.storyPoints * 3,
-    ticketsClosed: dev.ticketsClosed * 3
-  })),
-  'half-year': mockDevelopers.map(dev => ({
+  'custom-range': mockDevelopers.map(dev => ({
     ...dev,
     storyPoints: dev.storyPoints * 6,
     ticketsClosed: dev.ticketsClosed * 6
   })),
-  year: mockDevelopers.map(dev => ({
-    ...dev,
-    storyPoints: dev.storyPoints * 12,
-    ticketsClosed: dev.ticketsClosed * 12
-  }))
 };

@@ -6,6 +6,10 @@
 :root {
     --bg-color: #ffffff;
     --text-color: #000000;
+    --border-color: #cccccc;
+    --button-bg-color: #4f46e5;
+    --button-text-color: #ffffff;
+    --button-hover-bg-color: #4338ca;
     --card-bg-light: #ffffff;
     --card-text-light: #000000;
     --card-bg-dark: #1f2937;
@@ -32,6 +36,12 @@
     --stat-card-bg: var(--stat-card-bg-light);
     --stat-card-text: var(--stat-card-text-light);
     --stat-card-value: var(--stat-card-value-light);
+}
+
+.date-picker {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    border-color: var(--border-color);
 }
 
 body {

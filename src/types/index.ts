@@ -19,11 +19,7 @@ export interface Engineer {
 
 export interface TimeframeStats {
     sprint: Engineer[];
-    week: Engineer[];
-    month: Engineer[];
-    quarter: Engineer[];
-    'half-year': Engineer[];
-    year: Engineer[];
+    'custom-range': Engineer[];
 }
 
 export interface ChartData {
@@ -36,7 +32,7 @@ export interface TimeframeOption {
     id: string;
     label: string;
     value: string;
-    type: 'sprint' | 'week' | 'month' | 'quarter' | 'half-year' | 'year';
+    type: 'sprint' | 'custom-range';
 }
 
 export interface Assignee {
