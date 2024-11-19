@@ -80,17 +80,20 @@ export interface ComparisonResult {
     difference: Metrics;
 }
 
+export interface IndividualContribution {
+    name: string;
+    avatar: string;
+    storyPoints: number;
+    ticketsClosed: number;
+    issueTypeDistribution: Record<string, number>;
+    averageResolutionTime: number;
+}
+
 export interface Metrics {
     storyPoints: number;
     ticketsClosed: number;
-    issueTypeDistribution: Record<string, number>; // Ensure this is included and correctly typed
+    issueTypeDistribution: Record<string, number>;
     averageResolutionTime: number;
     overallTeamVelocity: number;
-    individualContributions: {
-        name: string;
-        storyPoints: number;
-        ticketsClosed: number;
-        issueTypeDistribution: Record<string, number>;
-        averageResolutionTime: number;
-    }[];
+    individualContributions: IndividualContribution[];
 }

@@ -13,8 +13,8 @@ export class MetricsComparator {
     }
 
     public async compareMetrics(timeframe1: DateRange, timeframe2: DateRange, role: Role): Promise<ComparisonResult> {
-        const jql1 = buildJQL(timeframe1.start.toString(), timeframe1.end.toString(), this.jiraConfig.project);
-        const jql2 = buildJQL(timeframe2.start.toString(), timeframe2.end.toString(), this.jiraConfig.project);
+        const jql1 = buildJQL(timeframe1.start?.toString() || '', timeframe1.end?.toString() || '', this.jiraConfig.project);
+        const jql2 = buildJQL(timeframe2.start?.toString() || '', timeframe2.end?.toString() || '', this.jiraConfig.project);
 
         const [issues1, issues2] = await Promise.all([
             this.jiraService.fetchIssues(jql1),
@@ -62,23 +62,24 @@ export class MetricsComparator {
                 overallTeamVelocity,
                 individualContributions: metrics.map(engineer => ({
                     name: engineer.name,
+                    avatar: engineer.avatar,
                     storyPoints: engineer.storyPoints,
                     ticketsClosed: engineer.ticketsClosed,
                     issueTypeDistribution: Object.fromEntries(engineer.issueTypeCount),
                     averageResolutionTime: engineer.issues.length
                         ? engineer.issues.reduce((sum, issue) => {
-                            const resolutionTime =
-                                new Date(issue.fields.resolutiondate as string).getTime() -
-                                new Date(issue.fields.created as string).getTime();
-                            return sum + resolutionTime;
-                        }, 0) / engineer.issues.length
+                        const resolutionTime =
+                            new Date(issue.fields.resolutiondate as string).getTime() -
+                            new Date(issue.fields.created as string).getTime();
+                        return sum + resolutionTime;
+                    }, 0) / engineer.issues.length
                         : 0,
                 })),
             };
         };
 
         const calculateDifference = (value1: number, value2: number) => {
-            return value1 - value2
+            return value1 - value2;
         };
 
         const metricsData1 = calculateMetrics(metrics1);
@@ -117,6 +118,7 @@ export class MetricsComparator {
                         { storyPoints: 0, ticketsClosed: 0, averageResolutionTime: 0, issueTypeDistribution: {} };
                     return {
                         name: contribution1.name,
+                        avatar: contribution1.avatar,
                         storyPoints: calculateDifference(
                             contribution1.storyPoints,
                             contribution2.storyPoints

@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaHome } from 'react-icons/fa';
 import TimeframeComparison from './TimeframeComparison';
-import ComparisonView from './ComparisionView';
 import { DateRange, ComparisonResult, JiraConfig, Role } from '../types';
 import { JiraService } from '../services/jiraService';
 import { MetricsComparator } from '../services/MetricsComparator';
+import MetricComparisonResult from './MetricComparisonResult.tsx';
 
 interface MetricComparisonPageProps {
     jiraConfig: JiraConfig;
@@ -32,7 +32,7 @@ const MetricComparisonPage: React.FC<MetricComparisonPageProps> = ({ jiraConfig,
                 </button>
             </div>
             <TimeframeComparison onCompare={handleCompare} />
-            {comparisonResult && <ComparisonView result={comparisonResult} />}
+            {comparisonResult && <MetricComparisonResult comparisonResult={comparisonResult} />}
         </div>
     );
 };
