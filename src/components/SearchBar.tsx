@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import {commonStyle} from "./styles/commonStyles.ts";
+import { commonStyle } from './styles/commonStyles.ts';
 
 interface SearchBarProps {
   engineers: { name: string; avatar: string }[];
-  selectedNames: { name: string; avatar: string }[];
-  setSelectedNames: (names: { name: string; avatar: string }[]) => void;
+  selectedNames?: { name: string; avatar: string }[];
+  setSelectedNames?: (names: { name: string; avatar: string }[]) => void;
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({ engineers, selectedNames, setSelectedNames }) => {
+const SearchBar: React.FC<SearchBarProps> = ({ engineers, selectedNames = [], setSelectedNames }) => {
   const [search, setSearch] = useState('');
   const [results, setResults] = useState<{ name: string; avatar: string }[]>([]);
 
@@ -26,7 +26,9 @@ const SearchBar: React.FC<SearchBarProps> = ({ engineers, selectedNames, setSele
   };
 
   const handleSelectName = (engineer: { name: string; avatar: string }) => {
-    setSelectedNames([...selectedNames, engineer]);
+    if (setSelectedNames) {
+      setSelectedNames([...selectedNames, engineer]);
+    }
     setSearch('');
     setResults([]);
   };
@@ -64,7 +66,9 @@ const SearchBar: React.FC<SearchBarProps> = ({ engineers, selectedNames, setSele
         {selectedNames.map(({ name, avatar }) => (
           <div key={name} className="bg-blue-200 text-blue-800 rounded-full px-3 py-1 m-1 flex items-center" style={commonStyle} title={name}>
             <img src={avatar} alt={name} className="w-6 h-6 rounded-full mr-2" />
-            <button onClick={() => setSelectedNames(selectedNames.filter(n => n.name !== name))} style={commonStyle} className="ml-2 text-red-500">✕</button>
+            {setSelectedNames && (
+              <button onClick={() => setSelectedNames(selectedNames.filter(n => n.name !== name))} style={commonStyle} className="ml-2 text-red-500">✕</button>
+            )}
           </div>
         ))}
       </div>

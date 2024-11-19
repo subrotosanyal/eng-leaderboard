@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     BarChart,
     Bar,
@@ -11,6 +11,7 @@ import {
     ResponsiveContainer,
 } from 'recharts';
 import Card from './Card';
+import SearchBar from './SearchBar';
 import { ComparisonResult, IndividualContribution } from '../types';
 import { commonStyle } from './styles/commonStyles';
 
@@ -23,6 +24,18 @@ const pieColors = ['#6d6dca', '#8bdc82', '#eddf98', '#cd8b8b', '#e3e3e3'];
 
 const MetricComparisonResult: React.FC<MetricComparisonResultProps> = ({ comparisonResult }) => {
     const { timeframe1, timeframe2, difference } = comparisonResult;
+
+    const developers = Array.from(new Set([
+        ...timeframe1.individualContributions,
+        ...timeframe2.individualContributions
+    ].map(contribution => contribution.name)))
+    .map(name => {
+        const contribution = timeframe1.individualContributions.find(c => c.name === name) ||
+                             timeframe2.individualContributions.find(c => c.name === name);
+        return { name: contribution!.name, avatar: contribution!.avatar };
+    });
+
+    const [selectedNames, setSelectedNames] = useState<{ name: string; avatar: string }[]>(developers);
 
     const renderPieChart = (data: Record<string, number | null>) => {
         const pieData = Object.entries(data).map(([key, value]) => ({
@@ -96,8 +109,17 @@ const MetricComparisonResult: React.FC<MetricComparisonResultProps> = ({ compari
                 </ResponsiveContainer>
             </div>
 
+            <div className="mb-4">
+                <SearchBar
+                    engineers={developers}
+                    selectedNames={selectedNames}
+                    setSelectedNames={setSelectedNames}
+                />
+            </div>
+
             <div>
                 <h3 className="text-xl font-semibold mb-4">Individual Contributions</h3>
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {timeframe1.individualContributions.map((contribution1) => {
                         const contribution2 = timeframe2.individualContributions.find(c => c.name === contribution1.name) || {
@@ -108,7 +130,7 @@ const MetricComparisonResult: React.FC<MetricComparisonResultProps> = ({ compari
                             issueTypeDistribution: {},
                             averageResolutionTime: 0,
                         };
-                        return (
+                        return selectedNames.some(selected => selected.name === contribution1.name) ? (
                             <Card
                                 key={contribution1.name}
                                 title={contribution1.name}
@@ -116,7 +138,7 @@ const MetricComparisonResult: React.FC<MetricComparisonResultProps> = ({ compari
                             >
                                 {renderIndividualContributionsComparison(contribution1, contribution2, contribution1.name)}
                             </Card>
-                        );
+                        ) : null;
                     })}
                 </div>
             </div>
