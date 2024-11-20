@@ -27,10 +27,20 @@ const SearchBar: React.FC<SearchBarProps> = ({ engineers, selectedNames = [], se
 
   const handleSelectName = (engineer: { name: string; avatar: string }) => {
     if (setSelectedNames) {
-      setSelectedNames([...selectedNames, engineer]);
+      const uniqueNames = new Set([...selectedNames, engineer].map(e => e.name));
+      const uniqueSelectedNames = Array.from(uniqueNames).map(name =>
+        engineers.find(engineer => engineer.name === name)!
+      );
+      setSelectedNames(uniqueSelectedNames);
     }
     setSearch('');
     setResults([]);
+  };
+
+  const handleClearAll = () => {
+    if (setSelectedNames) {
+      setSelectedNames([]);
+    }
   };
 
   return (
@@ -45,9 +55,9 @@ const SearchBar: React.FC<SearchBarProps> = ({ engineers, selectedNames = [], se
       />
       {results.length > 0 && (
         <div className="border mt-2 rounded bg-white shadow-lg" style={commonStyle}>
-          {results.map(engineer => (
+          {results.map((engineer, index) => (
             <div
-              key={engineer.name}
+              key={`${engineer.name}-${index}`}
               onClick={() => handleSelectName(engineer)}
               className="cursor-pointer p-2 hover:bg-gray-200 flex items-center"
             >
@@ -63,8 +73,8 @@ const SearchBar: React.FC<SearchBarProps> = ({ engineers, selectedNames = [], se
         </div>
       )}
       <div className="mt-2 flex flex-wrap">
-        {selectedNames.map(({ name, avatar }) => (
-          <div key={name} className="bg-blue-200 text-blue-800 rounded-full px-3 py-1 m-1 flex items-center" style={commonStyle} title={name}>
+        {selectedNames.map(({ name, avatar }, index) => (
+          <div key={`${name}-${index}`} className="bg-blue-200 text-blue-800 rounded-full px-3 py-1 m-1 flex items-center" style={commonStyle} title={name}>
             <img src={avatar} alt={name} className="w-6 h-6 rounded-full mr-2" />
             {setSelectedNames && (
               <button onClick={() => setSelectedNames(selectedNames.filter(n => n.name !== name))} style={commonStyle} className="ml-2 text-red-500">✕</button>
@@ -72,6 +82,11 @@ const SearchBar: React.FC<SearchBarProps> = ({ engineers, selectedNames = [], se
           </div>
         ))}
       </div>
+      {selectedNames.length > 0 && (
+        <button onClick={handleClearAll} className="mt-4 bg-red-500 text-white px-4 py-2 rounded" style={commonStyle}>
+          Clear All
+        </button>
+      )}
     </div>
   );
 };
