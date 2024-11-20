@@ -104,9 +104,9 @@ export class JiraService {
 
     async fetchIssues(jql: string): Promise<Issue[]> {
         const fields = ['assignee', 'status', 'updated', 'issuetype'];
-        if (this.jiraConfig.storyPointField) fields.push(this.jiraConfig.storyPointField);
-        if (this.jiraConfig.developerField) fields.push(this.jiraConfig.developerField);
-        if (this.jiraConfig.testedByField) fields.push(this.jiraConfig.testedByField);
+        if (this.jiraConfig.storyPointField) fields.push(this.jiraConfig.storyPointField.key);
+        if (this.jiraConfig.developerField) fields.push(this.jiraConfig.developerField.key);
+        if (this.jiraConfig.testedByField) fields.push(this.jiraConfig.testedByField.key);
 
         const issues: Issue[] = [];
         let startAt = 0;
@@ -147,14 +147,14 @@ export class JiraService {
 
         issues.forEach(issue => {
             const field = role === Role.Developer ? this.jiraConfig.developerField : this.jiraConfig.testedByField;
-            const developers: Assignee[] = issue.fields[field] as Assignee[] || [];
+            const developers: Assignee[] = issue.fields[field.key] as Assignee[] || [];
             const assignee: Assignee | null = issue.fields.assignee;
 
             const assignedDevelopers = developers.length > 0 ? developers : (assignee ? [assignee] : []);
 
             if (assignedDevelopers.length === 0) return;
 
-            const storyPoints = Number(issue.fields[this.jiraConfig.storyPointField]) || 0;
+            const storyPoints = Number(issue.fields[this.jiraConfig.storyPointField.key]) || 0;
             const storyPointsPerDeveloper = storyPoints / assignedDevelopers.length;
 
             assignedDevelopers.forEach(developer => {

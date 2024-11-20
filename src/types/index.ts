@@ -59,9 +59,9 @@ export interface Issue {
 export interface JiraConfig {
     project: string;
     board: string;
-    developerField: string;
-    storyPointField: string;
-    testedByField: string;
+    developerField: JiraField;
+    storyPointField: JiraField;
+    testedByField: JiraField;
 }
 
 export enum Role {
@@ -96,4 +96,9 @@ export interface Metrics {
     averageResolutionTime: number;
     overallTeamVelocity: number;
     individualContributions: IndividualContribution[];
+}
+export interface JiraField {
+    key: string;
+    name: string;
+    clauseName: string;
 }
