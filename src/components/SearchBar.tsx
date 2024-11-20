@@ -7,6 +7,7 @@ interface SearchBarProps {
   setSelectedNames?: (names: { name: string; avatar: string }[]) => void;
 }
 
+
 const SearchBar: React.FC<SearchBarProps> = ({ engineers, selectedNames = [], setSelectedNames }) => {
   const [search, setSearch] = useState('');
   const [results, setResults] = useState<{ name: string; avatar: string }[]>([]);
