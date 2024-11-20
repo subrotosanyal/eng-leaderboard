@@ -2,12 +2,25 @@ import {format} from 'date-fns';
 import type {JiraConfig} from '../types';
 
 
-export const buildJQL = (start: string, end: string, project: string): string => {
+export const closedTicketInATimeRangeJQL = (start: string, end: string, project: string): string => {
     return `
         project in (${project})
         AND statusCategory IN (Done)
-        AND updated >= "${format(new Date(start), 'yyyy-MM-dd')}"
-        AND updated < "${format(new Date(end), 'yyyy-MM-dd')}"
+        AND resolutiondate >= "${format(new Date(start), 'yyyy-MM-dd')}"
+        AND resolutiondate < "${format(new Date(end), 'yyyy-MM-dd')}"
+        ORDER BY updated DESC
+    `;
+};
+
+export const closedTicketForAnEngineerATimeRangeJQL = (start: string, end: string, project: string, engineerAccountId : string , additionalField?: string): string => {
+    const additionalFieldQuery = additionalField ? `AND ${additionalField} IN (${engineerAccountId})` : '';
+    return `
+        project in (${project})
+        AND assignee in (${engineerAccountId})
+        AND statusCategory IN (Done)
+        AND resolutiondate >= "${format(new Date(start), 'yyyy-MM-dd')}"
+        AND resolutiondate < "${format(new Date(end), 'yyyy-MM-dd')}"
+        ${additionalFieldQuery}
         ORDER BY updated DESC
     `;
 };

@@ -1,5 +1,5 @@
 import type { Engineer, ComparisonResult, DateRange, JiraConfig } from '../types';
-import { buildJQL } from './jiraQueries';
+import { closedTicketInATimeRangeJQL } from './jiraQueries';
 import { Role, Metrics } from '../types';
 import { JiraService } from './jiraService';
 
@@ -13,8 +13,8 @@ export class MetricsComparator {
     }
 
     public async compareMetrics(timeframe1: DateRange, timeframe2: DateRange, role: Role): Promise<ComparisonResult> {
-        const jql1 = buildJQL(timeframe1.start?.toString() || '', timeframe1.end?.toString() || '', this.jiraConfig.project);
-        const jql2 = buildJQL(timeframe2.start?.toString() || '', timeframe2.end?.toString() || '', this.jiraConfig.project);
+        const jql1 = closedTicketInATimeRangeJQL(timeframe1.start?.toString() || '', timeframe1.end?.toString() || '', this.jiraConfig.project);
+        const jql2 = closedTicketInATimeRangeJQL(timeframe2.start?.toString() || '', timeframe2.end?.toString() || '', this.jiraConfig.project);
 
         const [issues1, issues2] = await Promise.all([
             this.jiraService.fetchIssues(jql1),
