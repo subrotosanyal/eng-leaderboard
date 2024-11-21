@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GenericJiraService } from '../services/GenericJiraService';
 import type { JiraConfig, JiraField } from '../types';
-import { commonStyle } from './styles/commonStyles.ts';
+import { commonStyle } from './styles/commonStyles';
 
 interface ConfigDialogProps {
   isOpen: boolean;
@@ -19,136 +19,151 @@ const ConfigDialog: React.FC<ConfigDialogProps> = ({ isOpen, onClose, onSave, in
     testedByField: '',
   });
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
-  const searchBoxRefs = useRef<{ [key: string]: HTMLInputElement | null }>({
-    developerField: null,
-    storyPointField: null,
-    testedByField: null,
-  });
+
+  // Load fields from localStorage on mount
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const storedProject = localStorage.getItem('jiraProject');
+    const storedBoard = localStorage.getItem('jiraBoard') || initialConfig.board;
+    const storedDeveloperField = localStorage.getItem('jiraDeveloperField');
+    const storedStoryPointField = localStorage.getItem('jiraStoryPointField');
+    const storedTestedByField = localStorage.getItem('jiraTestedByField');
+
+    setConfig({
+      project: storedProject || '',
+      board: storedBoard || '',
+      developerField: storedDeveloperField ? JSON.parse(storedDeveloperField) : initialConfig.developerField,
+      storyPointField: storedStoryPointField ? JSON.parse(storedStoryPointField) : initialConfig.storyPointField,
+      testedByField: storedTestedByField ? JSON.parse(storedTestedByField) : initialConfig.testedByField,
+    });
+
+    // Prefill searches with the names of the selected fields
+    setSearches({
+      developerField: storedDeveloperField ? JSON.parse(storedDeveloperField).name : '',
+      storyPointField: storedStoryPointField ? JSON.parse(storedStoryPointField).name : '',
+      testedByField: storedTestedByField ? JSON.parse(storedTestedByField).name : '',
+    });
+  }, [isOpen, initialConfig]);
 
   useEffect(() => {
+    if (!isOpen) return;
+
     const fetchFields = async () => {
       try {
         const jiraService = new GenericJiraService();
         const fetchedFields = await jiraService.getJiraFields();
         setFields(fetchedFields);
       } catch (error) {
-        console.error('Error fetching JIRA fields:', error);
+        console.error('Failed to fetch Jira fields:', error);
       }
     };
 
-    if (isOpen) fetchFields();
+    fetchFields();
   }, [isOpen]);
 
-  useEffect(() => {
-    setConfig(initialConfig);
-  }, [initialConfig]);
+  const handleInputChange = (fieldName: string, value: string) => {
+    setConfig((prevConfig) => ({ ...prevConfig, [fieldName]: value }));
+  };
 
-  useEffect(() => {
-    if (activeDropdown && searchBoxRefs.current[activeDropdown]) {
-      searchBoxRefs.current[activeDropdown]?.focus(); // Keep focus in the active search box
-    }
-  }, [searches, activeDropdown]);
-
-  const handleSearchChange = (fieldName: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { value } = e.target;
+  const handleDropdownSearchChange = (fieldName: string, value: string) => {
     setSearches((prev) => ({ ...prev, [fieldName]: value }));
+    setActiveDropdown(fieldName);
   };
 
-  const handleDropdownChange = (name: string, value: JiraField) => {
-    setConfig((prevConfig) => ({ ...prevConfig, [name]: value }));
-    setSearches((prev) => ({ ...prev, [name]: value.name })); // Display selected value
-    setActiveDropdown(null);
+  const handleDropdownSelect = (fieldName: string, field: JiraField) => {
+    setConfig((prevConfig) => ({ ...prevConfig, [fieldName]: field }));
+    setSearches((prev) => ({ ...prev, [fieldName]: field.name }));
+    setActiveDropdown(null); // Close the dropdown after selection
   };
 
-  const handleSubmit = () => {
-    onSave(config);
+  const handleSave = () => {
+    localStorage.setItem('jiraProject', config.project);
+    localStorage.setItem('jiraBoard', config.board);
     localStorage.setItem('jiraDeveloperField', JSON.stringify(config.developerField));
     localStorage.setItem('jiraStoryPointField', JSON.stringify(config.storyPointField));
     localStorage.setItem('jiraTestedByField', JSON.stringify(config.testedByField));
+
+    onSave(config);
     onClose();
   };
 
   if (!isOpen) return null;
 
-  const ConfigInputField: React.FC<{ label: string; name: string; value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void }> = ({ label, name, value, onChange }) => (
-      <div className="mb-4">
-        <label className="block text-gray-700">{label}</label>
-        <input
-            type="text"
-            name={name}
-            value={value}
-            onChange={onChange}
-            className="border p-2 rounded w-full"
-            style={commonStyle}
-        />
-      </div>
-  );
-
-  const ConfigDropdownField: React.FC<{ label: string; name: string; value: JiraField | null; onChange: (name: string, value: JiraField) => void }> = ({ label, name, onChange }) => (
-      <div className="mb-4 relative">
-        <label className="block text-gray-700">{label}</label>
-        <input
-            ref={(el) => (searchBoxRefs.current[name] = el)}
-            type="text"
-            placeholder="Search..."
-            value={searches[name]}
-            onChange={handleSearchChange(name)}
-            className="border p-2 rounded w-full"
-            style={commonStyle}
-            onFocus={() => setActiveDropdown(name)}
-        />
-        {activeDropdown === name && (
-            <div
-                className="absolute z-10 bg-white border border-gray-300 rounded shadow-lg max-h-48 overflow-y-auto w-full"
-                style={commonStyle}
-            >
-              {fields
-                  .filter((field) =>
-                      field.key.toLowerCase().includes(searches[name].toLowerCase()) ||
-                      field.clauseName.toLowerCase().includes(searches[name].toLowerCase()) ||
-                      field.name.toLowerCase().includes(searches[name].toLowerCase())
-                  )
-                  .map((field) => (
-                      <div
-                          key={field.key}
-                          onClick={() => onChange(name, field)}
-                          className="cursor-pointer p-2 hover:bg-gray-200"
-                      >
-                        {field.key} - {field.clauseName} - {field.name}
-                      </div>
-                  ))}
-            </div>
-        )}
-      </div>
-  );
-
   return (
-      <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
+      <div className="fixed inset-0 flex items-center justify-center" style={commonStyle}>
         <div className="bg-white p-6 rounded-lg shadow-lg w-96" style={commonStyle}>
-          <h2 className="text-xl font-bold mb-4">Configuration</h2>
-          <ConfigInputField label="Project" name="project" value={config.project} onChange={(e) => setConfig({ ...config, project: e.target.value })} />
-          <ConfigInputField label="Board" name="board" value={config.board} onChange={(e) => setConfig({ ...config, board: e.target.value })} />
-          <ConfigDropdownField
-              label="Developer Field Name"
-              name="developerField"
-              value={config.developerField || null}
-              onChange={handleDropdownChange}
-          />
-          <ConfigDropdownField
-              label="Story Point Field Name"
-              name="storyPointField"
-              value={config.storyPointField || null}
-              onChange={handleDropdownChange}
-          />
-          <ConfigDropdownField
-              label="Tested By Field Name"
-              name="testedByField"
-              value={config.testedByField || null}
-              onChange={handleDropdownChange}
-          />
+          <h2 className="text-xl font-bold mb-4" style={commonStyle}>Configuration</h2>
+
+          {/* Input for Project */}
+          <div className="mb-4">
+            <label className="block text-gray-700 mb-1" style={commonStyle}>Project</label>
+            <input
+                type="text"
+                value={config.project}
+                onChange={(e) => handleInputChange('project', e.target.value)}
+                className="border p-2 rounded w-full"
+                style={commonStyle}
+            />
+          </div>
+
+          {/* Input for Board */}
+          <div className="mb-4">
+            <label className="block text-gray-700 mb-1" style={commonStyle}>Board</label>
+            <input
+                type="text"
+                value={config.board}
+                onChange={(e) => handleInputChange('board', e.target.value)}
+                className="border p-2 rounded w-full"
+                style={commonStyle}
+            />
+          </div>
+
+          {/* Dropdowns for Jira Fields */}
+          {['developerField', 'storyPointField', 'testedByField'].map((fieldName) => (
+              <div key={fieldName} className="mb-4 relative" style={commonStyle}>
+                <label className="block text-gray-700 mb-1" style={commonStyle}>
+                  {fieldName === 'developerField' && 'Developer Field Name'}
+                  {fieldName === 'storyPointField' && 'Story Point Field Name'}
+                  {fieldName === 'testedByField' && 'Tested By Field Name'}
+                </label>
+                <input
+                    type="text"
+                    placeholder="Search..."
+                    value={searches[fieldName]}
+                    onChange={(e) => handleDropdownSearchChange(fieldName, e.target.value)}
+                    className="border p-2 rounded w-full"
+                    style={commonStyle}
+                    onFocus={() => setActiveDropdown(fieldName)} // Open dropdown on focus
+                />
+                {activeDropdown === fieldName && searches[fieldName] && (
+                    <div
+                        className="absolute z-10 bg-white border border-gray-300 rounded shadow-lg max-h-48 overflow-y-auto w-full"
+                        style={commonStyle}
+                    >
+                      {fields
+                          .filter((field) =>
+                              field.name.toLowerCase().includes(searches[fieldName].toLowerCase())
+                          )
+                          .map((field) => (
+                              <div
+                                  key={field.key}
+                                  onClick={() => handleDropdownSelect(fieldName, field)}
+                                  className="cursor-pointer p-2 hover:bg-gray-200"
+                                  style={commonStyle}
+                              >
+                                {field.key} - {field.clauseName} - {field.name}
+                              </div>
+                          ))}
+                    </div>
+                )}
+              </div>
+          ))}
+
+          {/* Action Buttons */}
           <div className="flex justify-end space-x-2">
             <button onClick={onClose} className="bg-gray-500 text-white px-4 py-2 rounded">Cancel</button>
-            <button onClick={handleSubmit} className="bg-blue-500 text-white px-4 py-2 rounded">Save</button>
+            <button onClick={handleSave} className="bg-blue-500 text-white px-4 py-2 rounded">Save</button>
           </div>
         </div>
       </div>

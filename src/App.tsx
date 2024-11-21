@@ -12,9 +12,9 @@ const App: React.FC = () => {
     const loadConfig = (): JiraConfig => ({
         project: localStorage.getItem('jiraProject') || '',
         board: localStorage.getItem('jiraBoard') || '',
-        developerField: localStorage.getItem('jiraDeveloperField') || '',
-        storyPointField: localStorage.getItem('jiraStoryPointField') || '',
-        testedByField: localStorage.getItem('jiraTestedByField') || '',
+        developerField: JSON.parse(localStorage.getItem('jiraDeveloperField') || ''),
+        storyPointField: JSON.parse(localStorage.getItem('jiraStoryPointField') || ''),
+        testedByField: JSON.parse(localStorage.getItem('jiraTestedByField') || ''),
     });
 
     const [sprints, setSprints] = useState<Sprint[]>([]);
