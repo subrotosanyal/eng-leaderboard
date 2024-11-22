@@ -38,9 +38,6 @@ const EngineerDetailsPage: React.FC<{ jiraConfig: JiraConfig; role: Role }> = ({
     return (
         <div className="container mx-auto p-4" style={commonStyle}>
             <div className="flex justify-between items-center mb-4">
-                <h1 className="text-2xl font-bold" style={commonStyle}>
-                    Engineer Details
-                </h1>
                 <button onClick={() => navigate('/')} className="text-blue-500 hover:text-blue-700">
                     <FaHome size={24} />
                 </button>
