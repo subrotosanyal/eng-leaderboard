@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { ThemeProvider } from './context/ThemeContext';
-import { config } from './config/env';
+import React, {useEffect, useState} from 'react';
+import {BrowserRouter as Router, Route, Routes} from 'react-router-dom';
+import {ThemeProvider} from './context/ThemeContext';
+import {config} from './config/env';
 import MainPage from './components/main_page/MainPage';
 import MetricComparisonPage from './components/comparsion_page/MetricComparisonPage.tsx';
 import EngineerDetailsPage from "./components/engineer_page/EngineerDetailsPage.tsx";
-import { JiraConfig, Role } from './types';
+import {JiraConfig, Role} from './types';
 
 const App: React.FC = () => {
     const loadConfig = (): JiraConfig => ({
@@ -42,7 +42,8 @@ const App: React.FC = () => {
         <ThemeProvider>
             <Router>
                 <Routes>
-                    <Route path="/engineer/:engineerId" element={<EngineerDetailsPage jiraConfig={jiraConfig} role={role}/>} />
+                    <Route path="/engineer/:engineerId"
+                           element={<EngineerDetailsPage jiraConfig={jiraConfig} role={role}/>}/>
                     <Route
                         path="/"
                         element={
@@ -56,14 +57,9 @@ const App: React.FC = () => {
                             />
                         }
                     />
-                    <Route                        path="/comparison"
-                        element={
-                            <MetricComparisonPage
-                                jiraConfig={jiraConfig}
-                                role={role}
-                                setIsMockData={setIsMockData}
-                            />
-                        }
+                    <Route path="/comparison" element={
+                        <MetricComparisonPage jiraConfig={jiraConfig} role={role} setIsMockData={setIsMockData}/>
+                    }
                     />
                 </Routes>
             </Router>
