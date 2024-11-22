@@ -7,6 +7,7 @@ import { config } from './config/env';
 import MainPage from './components/MainPage';
 import type { Engineer, JiraConfig, Sprint, TimeframeOption } from './types';
 import MetricComparisonPage from './components/MetricComparisonPage.tsx';
+import EngineerDetailsPage from "./components/engineer_details/EngineerDetailsPage.tsx";
 
 const App: React.FC = () => {
     const loadConfig = (): JiraConfig => ({
@@ -108,6 +109,7 @@ const App: React.FC = () => {
         <ThemeProvider>
             <Router>
                 <Routes>
+                    <Route path="/engineer/:engineerId" element={<EngineerDetailsPage jiraConfig={jiraConfig} role={role}/>} />
                     <Route
                         path="/"
                         element={

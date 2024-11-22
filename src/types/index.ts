@@ -102,3 +102,22 @@ export interface JiraField {
     name: string;
     clauseName: string;
 }
+
+export interface UserDetails {
+    accountId: string;
+    accountType: string;
+    active: boolean;
+    avatarUrls: {
+        '16x16': string;
+        '24x24': string;
+        '32x32': string;
+        '48x48': string;
+    };
+    displayName: string;
+    emailAddress: string;
+    key: string;
+    name: string;
+    self: string;
+    timeZone: string;
+    locale: string
+}

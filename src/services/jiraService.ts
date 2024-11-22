@@ -1,17 +1,11 @@
 import api from './api';
-import { queries } from './jiraQueries';
-import { isAfter, subMonths } from 'date-fns';
-import type {
-    Assignee,
-    Engineer,
-    Issue,
-    JiraConfig,
-    Sprint,
-    TimeframeOption,
-} from '../types';
-import { mockSprints, mockTimeframeStats } from '../mocks/data';
-import { config } from "../config/env";
-import { Role } from '../types';
+import {closedTicketForAnEngineerATimeRangeJQL, queries} from './jiraQueries';
+import {isAfter, subMonths} from 'date-fns';
+import {Assignee, Engineer, Issue, JiraConfig, Role, Sprint, TimeframeOption,} from '../types';
+import {mockSprints, mockTimeframeStats} from '../mocks/data';
+import {config} from "../config/env";
+import { getStoryPointsPerDeveloper } from './utils/jiraUtils';
+
 
 export class JiraService {
     private readonly isConfigured: boolean;
@@ -103,7 +97,7 @@ export class JiraService {
     }
 
     async fetchIssues(jql: string): Promise<Issue[]> {
-        const fields = ['assignee', 'status', 'updated', 'issuetype'];
+        const fields = ['assignee', 'status', 'updated', 'issuetype', 'resolutiondate'];
         if (this.jiraConfig.storyPointField) fields.push(this.jiraConfig.storyPointField.key);
         if (this.jiraConfig.developerField) fields.push(this.jiraConfig.developerField.key);
         if (this.jiraConfig.testedByField) fields.push(this.jiraConfig.testedByField.key);
@@ -154,8 +148,7 @@ export class JiraService {
 
             if (assignedDevelopers.length === 0) return;
 
-            const storyPoints = Number(issue.fields[this.jiraConfig.storyPointField.key]) || 0;
-            const storyPointsPerDeveloper = storyPoints / assignedDevelopers.length;
+            const storyPointsPerDeveloper = getStoryPointsPerDeveloper(issue, this.jiraConfig, role);
 
             assignedDevelopers.forEach(developer => {
                 const devData = devMap.get(developer.accountId) || {
@@ -189,5 +182,13 @@ export class JiraService {
                 rank: index + 1,
                 trend: dev.previousRank ? dev.previousRank - (index + 1) : 0
             }));
+    }
+
+    async getClosedTicketsForEngineer(engineerAccountId: string, jiraConfig: JiraConfig, role: Role): Promise<Issue[]> {
+        const endDate = new Date();
+        const startDate = subMonths(endDate, 12);
+        const jql = closedTicketForAnEngineerATimeRangeJQL(startDate.toDateString(), endDate.toDateString(), jiraConfig.project, engineerAccountId, role == Role.Developer ? jiraConfig.developerField.clauseName : jiraConfig.testedByField.clauseName);
+
+        return await this.fetchIssues(jql);
     }
 }

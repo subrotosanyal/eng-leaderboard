@@ -13,14 +13,13 @@ export const closedTicketInATimeRangeJQL = (start: string, end: string, project:
 };
 
 export const closedTicketForAnEngineerATimeRangeJQL = (start: string, end: string, project: string, engineerAccountId : string , additionalField?: string): string => {
-    const additionalFieldQuery = additionalField ? `AND ${additionalField} IN (${engineerAccountId})` : '';
+    const additionalFieldQuery = additionalField ? `AND (${additionalField} IN (${engineerAccountId}) OR assignee in (${engineerAccountId}))` : 'ADD assignee in (${engineerAccountId})';
     return `
         project in (${project})
-        AND assignee in (${engineerAccountId})
+        ${additionalFieldQuery}
         AND statusCategory IN (Done)
         AND resolutiondate >= "${format(new Date(start), 'yyyy-MM-dd')}"
         AND resolutiondate < "${format(new Date(end), 'yyyy-MM-dd')}"
-        ${additionalFieldQuery}
         ORDER BY updated DESC
     `;
 };

@@ -1,4 +1,4 @@
-import {JiraField} from "../types";
+import {JiraField, UserDetails} from "../types";
 import api from "./api.ts";
 
 interface RawJiraField {
@@ -36,4 +36,14 @@ export class GenericJiraService {
             throw error;
         }
     };
+
+    getUserDetails = async (userId: string): Promise<UserDetails> => {
+        try {
+            const response = await api.get(`/rest/api/3/user?accountId=${userId}`);
+            return response.data as UserDetails;
+        } catch (error) {
+            console.error('Error fetching user details:', error);
+            throw error;
+        }
+    }
 }
