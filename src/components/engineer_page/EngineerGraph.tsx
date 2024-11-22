@@ -13,7 +13,7 @@ import {
 } from 'chart.js';
 import { Issue, JiraConfig, Role } from '../../types';
 import { getStoryPointsPerDeveloper } from '../../services/utils/jiraUtils';
-import Card from '../Card';
+import Card from '../commom_components/Card';
 import {commonStyle} from "../styles/commonStyles.ts";
 
 // Register required Chart.js components

@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaHome } from 'react-icons/fa';
 import TimeframeComparison from './TimeframeComparison';
-import { DateRange, ComparisonResult, JiraConfig, Role } from '../types';
-import { JiraService } from '../services/jiraService';
-import { MetricsComparator } from '../services/MetricsComparator';
+import { DateRange, ComparisonResult, JiraConfig, Role } from '../../types';
+import { JiraService } from '../../services/jiraService';
+import { MetricsComparator } from '../../services/MetricsComparator';
 import MetricComparisonResult from './MetricComparisonResult.tsx';
 
 interface MetricComparisonPageProps {

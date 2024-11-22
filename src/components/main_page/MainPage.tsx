@@ -4,14 +4,14 @@ import { Layout, Menu } from 'lucide-react';
 import LeaderCard from './LeaderCard';
 import PerformanceChart from './PerformanceChart';
 import TimeframeSelector from './TimeframeSelector';
-import ConfigDialog from './ConfigDialog';
+import ConfigDialog from '../ConfigDialog';
 import TeamStats from './TeamStats';
 import MockDataStrip from './MockDataStrip';
-import SearchBar from './SearchBar';
+import SearchBar from '../commom_components/SearchBar';
 import RoleSlider from './RoleSlider';
-import ThemeSwitcher from './ThemeSwitcher';
-import { commonStyle } from './styles/commonStyles';
-import type { Engineer, Sprint, TimeframeOption, JiraConfig, Role } from '../types';
+import ThemeSwitcher from '../ThemeSwitcher';
+import { commonStyle } from '../styles/commonStyles';
+import type { Engineer, Sprint, TimeframeOption, JiraConfig, Role } from '../../types';
 
 interface MainPageProps {
     sprints: Sprint[];

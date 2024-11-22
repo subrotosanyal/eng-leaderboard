@@ -4,10 +4,10 @@ import { ThemeProvider } from './context/ThemeContext';
 import { JiraService } from './services/jiraService';
 import { Role } from './types';
 import { config } from './config/env';
-import MainPage from './components/MainPage';
+import MainPage from './components/main_page/MainPage';
 import type { Engineer, JiraConfig, Sprint, TimeframeOption } from './types';
-import MetricComparisonPage from './components/MetricComparisonPage.tsx';
-import EngineerDetailsPage from "./components/engineer_details/EngineerDetailsPage.tsx";
+import MetricComparisonPage from './components/comparsion_page/MetricComparisonPage.tsx';
+import EngineerDetailsPage from "./components/engineer_page/EngineerDetailsPage.tsx";
 
 const App: React.FC = () => {
     const loadConfig = (): JiraConfig => ({

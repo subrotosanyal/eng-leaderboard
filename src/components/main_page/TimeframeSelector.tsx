@@ -1,8 +1,7 @@
-// src/components/TimeframeSelector.tsx
 import React from 'react';
 import CustomDropdown from './CustomDropdown';
-import type { TimeframeOption, Sprint } from '../types';
-import {commonStyle} from "./styles/commonStyles.ts";
+import type { TimeframeOption, Sprint } from '../../types';
+import {commonStyle} from "../styles/commonStyles.ts";
 
 interface TimeframeSelectorProps {
   selected: TimeframeOption;

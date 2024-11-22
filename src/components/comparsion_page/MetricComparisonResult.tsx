@@ -10,10 +10,10 @@ import {
     Cell,
     ResponsiveContainer,
 } from 'recharts';
-import Card from './Card';
-import SearchBar from './SearchBar';
-import { ComparisonResult, IndividualContribution } from '../types';
-import { commonStyle } from './styles/commonStyles';
+import Card from '../commom_components/Card';
+import SearchBar from '../commom_components/SearchBar';
+import { ComparisonResult, IndividualContribution } from '../../types';
+import { commonStyle } from '../styles/commonStyles';
 
 interface MetricComparisonResultProps {
     comparisonResult: ComparisonResult;

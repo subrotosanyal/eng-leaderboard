@@ -1,5 +1,5 @@
 import React from 'react';
-import { commonStyle } from './styles/commonStyles';
+import { commonStyle } from '../styles/commonStyles';
 
 interface CardProps {
   title: string;

@@ -1,8 +1,8 @@
 import React from 'react';
 import { Users } from 'lucide-react';
-import type { Engineer } from '../types';
-import Card from './Card';
-import StatCard from './StatCard';
+import type { Engineer } from '../../types';
+import Card from '../commom_components/Card';
+import StatCard from '../commom_components/StatCard';
 
 interface TeamStatsProps {
   developers: Engineer[];

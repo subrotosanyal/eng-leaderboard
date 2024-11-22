@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { commonStyle } from './styles/commonStyles.ts';
+import { commonStyle } from '../styles/commonStyles.ts';
 
 interface SearchBarProps {
   engineers: { name: string; avatar: string }[];

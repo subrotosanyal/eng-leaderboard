@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import DateRangeSelector from './DateRangeSelector';
-import { DateRange } from '../types';
+import DateRangeSelector from '../commom_components/DateRangeSelector';
+import { DateRange } from '../../types';
 import { LuGitCompare } from 'react-icons/lu';
 import { FaSpinner } from 'react-icons/fa';
-import Card from './Card';
+import Card from '../commom_components/Card';
 
 const TimeframeComparison = ({ onCompare }: { onCompare: (timeframe1: DateRange, timeframe2: DateRange) => void }) => {
     const [timeframe1, setTimeframe1] = useState<DateRange>({ start: null, end: null });

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { JiraService } from '../../services/jiraService';
 import { GenericJiraService } from '../../services/GenericJiraService';
 import { FaHome } from 'react-icons/fa';
-import Card from '../Card';
+import Card from '../commom_components/Card';
 import EngineerGraph from './EngineerGraph';
 import { commonStyle } from '../styles/commonStyles';
 import { Issue, JiraConfig, Role, UserDetails } from '../../types';

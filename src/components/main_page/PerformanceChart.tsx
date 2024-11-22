@@ -1,5 +1,5 @@
 import React from 'react';
-import Card from './Card';
+import Card from '../commom_components/Card';
 import {
   BarChart,
   Bar,
@@ -12,7 +12,7 @@ import {
   Pie,
   Cell,
 } from 'recharts';
-import type { Engineer, ChartData } from '../types';
+import type { Engineer, ChartData } from '../../types';
 
 interface PerformanceChartProps {
   developers: Engineer[];

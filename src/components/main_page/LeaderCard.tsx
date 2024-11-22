@@ -1,11 +1,11 @@
 import { Medal, Trophy } from 'lucide-react';
-import type { Engineer, Issue } from '../types';
-import { config } from '../config/env';
+import type { Engineer, Issue } from '../../types';
+import { config } from '../../config/env';
 import React from 'react';
-import { commonStyle } from './styles/commonStyles';
-import Card from './Card';
+import { commonStyle } from '../styles/commonStyles';
+import Card from '../commom_components/Card';
 import { Tooltip } from 'react-tooltip';
-import StatCard from './StatCard';
+import StatCard from '../commom_components/StatCard';
 import { useNavigate } from 'react-router-dom';
 
 interface LeaderCardProps {

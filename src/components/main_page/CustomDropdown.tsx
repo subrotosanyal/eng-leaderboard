@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import type { TimeframeOption } from '../types';
-import { commonStyle } from './styles/commonStyles.ts';
-import DateRangeSelector from './DateRangeSelector';
+import type { TimeframeOption } from '../../types';
+import { commonStyle } from '../styles/commonStyles.ts';
+import DateRangeSelector from '../commom_components/DateRangeSelector';
 
 interface CustomDropdownProps {
     options: TimeframeOption[];

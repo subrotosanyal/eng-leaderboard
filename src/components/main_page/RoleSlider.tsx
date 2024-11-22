@@ -1,9 +1,9 @@
 import React from 'react';
 import Toggle from 'react-toggle';
 import 'react-toggle/style.css';
-import { Role } from '../types';
+import { Role } from '../../types';
 import { Wrench , Search } from 'lucide-react';
-import {commonStyle} from "./styles/commonStyles.ts";
+import {commonStyle} from "../styles/commonStyles.ts";
 
 interface RoleSliderProps {
   role: Role;
