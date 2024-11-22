@@ -20,8 +20,12 @@ const EngineerDetailsPage: React.FC<{ jiraConfig: JiraConfig; role: Role }> = ({
                 const jiraService = new JiraService(jiraConfig, () => {});
                 const genericJiraService = new GenericJiraService();
                 if (engineerId) {
-                    setIssues(await jiraService.getClosedTicketsForEngineer(engineerId, jiraConfig, role));
-                    setEngineerDetails(await genericJiraService.getUserDetails(engineerId));
+                    const [fetchedIssues, fetchedEngineerDetails] = await Promise.all([
+                        jiraService.getClosedTicketsForEngineer(engineerId, jiraConfig, role),
+                        genericJiraService.getUserDetails(engineerId)
+                    ]);
+                    setIssues(fetchedIssues);
+                    setEngineerDetails(fetchedEngineerDetails);
                 }
             } catch (error) {
                 console.error('Error fetching engineer data:', error);

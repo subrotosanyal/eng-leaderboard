@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Layout, Menu } from 'lucide-react';
 import LeaderCard from './LeaderCard';
@@ -11,44 +11,94 @@ import SearchBar from '../commom_components/SearchBar';
 import RoleSlider from './RoleSlider';
 import ThemeSwitcher from '../ThemeSwitcher';
 import { commonStyle } from '../styles/commonStyles';
+import { JiraService } from '../../services/jiraService';
 import type { Engineer, Sprint, TimeframeOption, JiraConfig, Role } from '../../types';
 
 interface MainPageProps {
-    sprints: Sprint[];
-    selectedTimeframe: TimeframeOption;
-    setSelectedTimeframe: (timeframe: TimeframeOption) => void;
-    developers: Engineer[];
-    loading: boolean;
-    isMockData: boolean;
-    selectedNames: { name: string; avatar: string }[];
-    setSelectedNames: (names: { name: string; avatar: string }[]) => void;
-    isConfigDialogOpen: boolean;
-    setIsConfigDialogOpen: (isOpen: boolean) => void;
     jiraConfig: JiraConfig;
     handleConfigSave: (newConfig: JiraConfig) => void;
     role: Role;
     setRole: (role: Role) => void;
+    isMockData: boolean;
+    setIsMockData: (isMockData: boolean) => void;
 }
 
 const MainPage: React.FC<MainPageProps> = ({
-    sprints,
-    selectedTimeframe,
-    setSelectedTimeframe,
-    developers,
-    loading,
-    isMockData,
-    selectedNames,
-    setSelectedNames,
-    isConfigDialogOpen,
-    setIsConfigDialogOpen,
     jiraConfig,
     handleConfigSave,
     role,
     setRole,
+    isMockData,
+    setIsMockData,
 }) => {
-    const filteredDevelopers = developers.filter((dev) =>
-        selectedNames.some((selected) => selected.name === dev.name)
-    );
+    const [sprints, setSprints] = useState<Sprint[]>([]);
+    const [selectedTimeframe, setSelectedTimeframe] = useState<TimeframeOption>({
+        id: 'loading',
+        label: 'Loading...',
+        value: '',
+        type: 'sprint',
+    });
+    const [developers, setDevelopers] = useState<Engineer[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [selectedNames, setSelectedNames] = useState<{ name: string; avatar: string }[]>([]);
+    const [isConfigDialogOpen, setIsConfigDialogOpen] = useState(false);
+
+    useEffect(() => {
+        const initializeData = async () => {
+            try {
+                const jiraService = new JiraService(jiraConfig, setIsMockData);
+                const fetchedSprints = await jiraService.getSprints();
+                setSprints(fetchedSprints);
+
+                const currentSprint = fetchedSprints[0];
+                setSelectedTimeframe({
+                    id: currentSprint.id,
+                    label: currentSprint.name,
+                    value: currentSprint.id,
+                    type: 'sprint',
+                });
+            } catch (err) {
+                setError('Failed to fetch sprints. Please check your JIRA configuration.');
+                console.error('Error fetching sprints:', err);
+            }
+        };
+
+        initializeData().catch((err) => console.error('Error in initializeData:', err));
+    }, [jiraConfig]);
+
+    useEffect(() => {
+        const fetchTimeframeData = async () => {
+            if (selectedTimeframe.id === 'loading') return;
+
+            try {
+                setLoading(true);
+                setError(null);
+                const jiraService = new JiraService(jiraConfig, setIsMockData);
+                const data = await jiraService.getTimeframeData(selectedTimeframe, role);
+                setDevelopers(data);
+                setSelectedNames(data.map((dev) => ({ name: dev.name, avatar: dev.avatar })));
+            } catch (err) {
+                setError('Failed to fetch leaderboard data. Please check your JIRA configuration.');
+                console.error('Error fetching JIRA data:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchTimeframeData().catch((err) => console.error('Error in fetchTimeframeData:', err));
+    }, [selectedTimeframe, jiraConfig, role]);
+
+    if (error) {
+        return (
+            <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+                <div className="bg-white p-8 rounded-lg shadow-lg">
+                    <h2 className="text-xl font-bold text-red-600 mb-4">Error</h2>
+                    <p className="text-gray-700">{error}</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-100" style={commonStyle}>
@@ -100,7 +150,9 @@ const MainPage: React.FC<MainPageProps> = ({
                 ) : (
                     <>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                            {filteredDevelopers.map((developer, index) => (
+                            {developers.filter((dev) =>
+                                selectedNames.some((selected) => selected.name === dev.name)
+                            ).map((developer, index) => (
                                 <LeaderCard
                                     key={developer.id}
                                     developer={developer}
