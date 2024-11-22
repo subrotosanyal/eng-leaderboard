@@ -56,7 +56,7 @@ const LeaderCard: React.FC<LeaderCardProps> = ({ developer, rank }) => {
                     <img
                         src={developer.avatar}
                         alt={developer.name}
-                        className="w-16 h-16 rounded-full object-cover border-2 border-indigo-500"
+                        className="w-16 h-16 rounded-full object-cover border-2 border-indigo-500 cursor-pointer"
                         onClick={handleAvatarClick}
                     />
                     {getRankIcon() && (

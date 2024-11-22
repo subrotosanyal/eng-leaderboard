@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Line } from 'react-chartjs-2';
 import {
     BarElement,
@@ -28,6 +28,14 @@ interface EngineerGraphProps {
 const EngineerGraph: React.FC<EngineerGraphProps> = ({ issues, jiraConfig, role }) => {
     const [groupBy, setGroupBy] = useState<'week' | 'month' | 'quarter'>('month');
     const [cumulative, setCumulative] = useState(false);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        // Simulate data loading
+        setTimeout(() => {
+            setLoading(false);
+        }, 1000); // Adjust the timeout as needed
+    }, []);
 
     const processDataForGraph = (): ChartData<'line'> => {
         const groupedData: { [key: string]: { tickets: number; storyPoints: number } } = {};
@@ -142,56 +150,65 @@ const EngineerGraph: React.FC<EngineerGraphProps> = ({ issues, jiraConfig, role 
 
     return (
         <Card title="Engineer Performance">
-            <div className="flex justify-between mb-4">
-                <div>
-                    <select
-                        value={groupBy}
-                        onChange={(e) => setGroupBy(e.target.value as 'week' | 'month' | 'quarter')}
-                        style={commonStyle}
-                    >
-                        <option value="week">Week</option>
-                        <option value="month">Month</option>
-                        <option value="quarter">Quarter</option>
-                    </select>
+            {loading ? (
+                <div className="flex justify-center items-center h-64">
+                    <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-indigo-500"></div>
                 </div>
-                <div>
-                    <label>Cumulative:</label>
-                    <input
-                        type="checkbox"
-                        checked={cumulative}
-                        onChange={(e) => setCumulative(e.target.checked)}
+            ) : (
+                <>
+                    <div className="flex justify-between mb-4">
+                        <div>
+                            <label>Group By:</label>
+                            <select
+                                value={groupBy}
+                                onChange={(e) => setGroupBy(e.target.value as 'week' | 'month' | 'quarter')}
+                                style={commonStyle}
+                            >
+                                <option value="week">Week</option>
+                                <option value="month">Month</option>
+                                <option value="quarter">Quarter</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Cumulative:</label>
+                            <input
+                                type="checkbox"
+                                checked={cumulative}
+                                onChange={(e) => setCumulative(e.target.checked)}
+                            />
+                        </div>
+                    </div>
+                    <Line
+                        data={processDataForGraph()}
+                        options={{
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'top',
+                                    labels: {
+                                        filter: (legendItem) => !legendItem.text.includes('Average'),
+                                    },
+                                },
+                            },
+                            scales: {
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Time',
+                                    },
+                                },
+                                y: {
+                                    title: {
+                                        display: true,
+                                        text: 'Counts',
+                                    },
+                                },
+                            },
+                        }}
                     />
-                </div>
-            </div>
-            <Line
-                data={processDataForGraph()}
-                options={{
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            display: true,
-                            position: 'top',
-                            labels: {
-                                filter: (legendItem) => !legendItem.text.includes('Average'),
-                            },
-                        },
-                    },
-                    scales: {
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Time',
-                            },
-                        },
-                        y: {
-                            title: {
-                                display: true,
-                                text: 'Counts',
-                            },
-                        },
-                    },
-                }}
-            />
+                </>
+            )}
         </Card>
     );
 };
