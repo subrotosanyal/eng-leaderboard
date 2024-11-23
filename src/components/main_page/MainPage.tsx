@@ -65,7 +65,7 @@ const MainPage: React.FC<MainPageProps> = ({
         };
 
         initializeData().catch((err) => console.error('Error in initializeData:', err));
-    }, [jiraConfig]);
+    }, [jiraConfig, setIsMockData]);
 
     useEffect(() => {
         const fetchTimeframeData = async () => {
@@ -87,7 +87,7 @@ const MainPage: React.FC<MainPageProps> = ({
         };
 
         fetchTimeframeData().catch((err) => console.error('Error in fetchTimeframeData:', err));
-    }, [selectedTimeframe, jiraConfig, role]);
+    }, [selectedTimeframe, jiraConfig, role, setIsMockData]);
 
     if (error) {
         return (

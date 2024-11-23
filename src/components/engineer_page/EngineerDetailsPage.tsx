@@ -32,7 +32,7 @@ const EngineerDetailsPage: React.FC<{ jiraConfig: JiraConfig; role: Role }> = ({
             }
         };
 
-        fetchEngineer();
+        fetchEngineer().catch(error => console.error('Error in fetchEngineer:', error));
     }, [engineerId, jiraConfig, role]);
 
     return (

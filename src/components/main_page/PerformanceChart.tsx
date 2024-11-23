@@ -13,6 +13,7 @@ import {
   Cell,
 } from 'recharts';
 import type { Engineer, ChartData } from '../../types';
+import {commonStyle} from "../styles/commonStyles.ts";
 
 interface PerformanceChartProps {
   developers: Engineer[];
@@ -82,7 +83,7 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({ developers }) => {
             <XAxis dataKey="name" />
             <YAxis yAxisId="left" />
             <YAxis yAxisId="right" orientation="right" />
-            <Tooltip />
+            <Tooltip contentStyle={commonStyle}/>
             <Bar
               yAxisId="left"
               dataKey="storyPoints"
