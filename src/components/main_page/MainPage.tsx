@@ -10,7 +10,7 @@ import RoleSlider from './RoleSlider';
 import {commonStyle} from '../styles/commonStyles';
 import {JiraService} from '../../services/jiraService';
 import type {Engineer, JiraConfig, Role, Sprint, TimeframeOption} from '../../types';
-import ApplicationLayout from '../ApplicationLayout';
+import ApplicationLayout from '../layout/ApplicationLayout';
 
 interface MainPageProps {
     jiraConfig: JiraConfig;

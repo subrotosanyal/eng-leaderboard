@@ -5,7 +5,7 @@ import { DateRange, ComparisonResult, JiraConfig, Role } from '../../types';
 import { JiraService } from '../../services/jiraService';
 import { MetricsComparator } from '../../services/MetricsComparator';
 import MetricComparisonResult from './MetricComparisonResult.tsx';
-import ApplicationLayout from "../ApplicationLayout.tsx";
+import ApplicationLayout from "../layout/ApplicationLayout.tsx";
 
 interface MetricComparisonPageProps {
     jiraConfig: JiraConfig;

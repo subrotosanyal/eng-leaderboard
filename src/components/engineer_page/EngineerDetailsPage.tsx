@@ -6,7 +6,7 @@ import Card from '../commom_components/Card';
 import EngineerGraph from './EngineerGraph';
 import { commonStyle } from '../styles/commonStyles';
 import { Issue, JiraConfig, Role, UserDetails } from '../../types';
-import ApplicationLayout from "../ApplicationLayout.tsx";
+import ApplicationLayout from "../layout/ApplicationLayout.tsx";
 
 const EngineerDetailsPage: React.FC<{ jiraConfig: JiraConfig; role: Role }> = ({ jiraConfig, role }) => {
     const { engineerId } = useParams<{ engineerId: string }>();
