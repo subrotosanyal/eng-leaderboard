@@ -1,7 +1,7 @@
 import React from 'react';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme } from '../../context/ThemeContext';
 import { FaSun, FaMoon, FaDesktop } from 'react-icons/fa';
-import {commonStyle} from "./styles/commonStyles.ts";
+import {commonStyle} from "../styles/commonStyles.ts";
 
 const ThemeSwitcher: React.FC = () => {
     const { theme, setTheme } = useTheme();

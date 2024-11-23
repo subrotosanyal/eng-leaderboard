@@ -2,18 +2,17 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { JiraService } from '../../services/jiraService';
 import { GenericJiraService } from '../../services/GenericJiraService';
-import { FaHome } from 'react-icons/fa';
 import Card from '../commom_components/Card';
 import EngineerGraph from './EngineerGraph';
 import { commonStyle } from '../styles/commonStyles';
 import { Issue, JiraConfig, Role, UserDetails } from '../../types';
+import ApplicationLayout from "../ApplicationLayout.tsx";
 
 const EngineerDetailsPage: React.FC<{ jiraConfig: JiraConfig; role: Role }> = ({ jiraConfig, role }) => {
     const { engineerId } = useParams<{ engineerId: string }>();
     const [issues, setIssues] = useState<Issue[]>([]);
     const [engineerDetails, setEngineerDetails] = useState<UserDetails | null>(null);
-    const navigate = useNavigate();
-
+    useNavigate();
     useEffect(() => {
         const fetchEngineer = async () => {
             try {
@@ -36,12 +35,8 @@ const EngineerDetailsPage: React.FC<{ jiraConfig: JiraConfig; role: Role }> = ({
     }, [engineerId, jiraConfig, role]);
 
     return (
+        <ApplicationLayout>
         <div className="container mx-auto p-4" style={commonStyle}>
-            <div className="flex justify-between items-center mb-4">
-                <button onClick={() => navigate('/')} className="text-blue-500 hover:text-blue-700">
-                    <FaHome size={24} />
-                </button>
-            </div>
             {engineerDetails && (
                 <Card title={engineerDetails.displayName}>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
@@ -66,6 +61,7 @@ const EngineerDetailsPage: React.FC<{ jiraConfig: JiraConfig; role: Role }> = ({
                 role={role}
             />
         </div>
+        </ApplicationLayout>
     );
 };
 

@@ -20,6 +20,12 @@
     --stat-card-text-dark: #a0aec0;
     --stat-card-value-light: #2a4365;
     --stat-card-value-dark: #ebf4ff;
+    --side-panel-bg-light: #f8f9fa;
+    --side-panel-bg-dark: #1c232e;
+    --header-bg-light: #e9ecef;
+    --header-bg-dark: #162532;
+    --footer-bg-light: #e9ecef;
+    --footer-bg-dark: #122439;
 }
 
 .dark {
@@ -30,12 +36,18 @@
     --stat-card-bg: var(--stat-card-bg-dark);
     --stat-card-text: var(--stat-card-text-dark);
     --stat-card-value: var(--stat-card-value-dark);
+    --side-panel-bg: var(--side-panel-bg-dark);
+    --header-bg: var(--header-bg-dark);
+    --footer-bg: var(--footer-bg-dark);
 }
 
 .light {
     --stat-card-bg: var(--stat-card-bg-light);
     --stat-card-text: var(--stat-card-text-light);
     --stat-card-value: var(--stat-card-value-light);
+    --side-panel-bg: var(--side-panel-bg-light);
+    --header-bg: var(--header-bg-light);
+    --footer-bg: var(--footer-bg-light);
 }
 
 .date-picker {
