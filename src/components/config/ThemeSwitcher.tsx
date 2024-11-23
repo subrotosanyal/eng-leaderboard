@@ -7,7 +7,7 @@ const ThemeSwitcher: React.FC = () => {
     const { theme, setTheme } = useTheme();
 
     return (
-        <div className="fixed bottom-4 right-4 flex items-center space-x-2 bg-white p-2 rounded shadow-lg" style={commonStyle}>
+        <div className="space-x-2" style={commonStyle}>
             <button onClick={() => setTheme('light')} className={theme === 'light' ? 'font-bold' : ''}>
                 <FaSun className="w-6 h-6" />
             </button>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useReducer } from 'react';
+import React, { useState, useEffect, useReducer, useRef } from 'react';
 import ConfigDialog from '../config/ConfigDialog';
 import { useTheme } from '../../context/ThemeContext';
 import { commonStyle } from '../styles/commonStyles';
@@ -14,6 +14,7 @@ const ApplicationLayout: React.FC<{ children: React.ReactNode }> = ({ children }
     const [refreshKey, setRefreshKey] = useState(0);
     const { theme } = useTheme();
     const [, forceUpdate] = useReducer(x => x + 1, 0);
+    const contentRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const storedConfig = {
@@ -42,14 +43,13 @@ const ApplicationLayout: React.FC<{ children: React.ReactNode }> = ({ children }
             <SidePanel
                 isMenuCollapsed={isMenuCollapsed}
                 setIsMenuCollapsed={setIsMenuCollapsed}
-                setIsConfigDialogOpen={setIsConfigDialogOpen}
-            />
+                setIsConfigDialogOpen={setIsConfigDialogOpen} targetRef={contentRef}            />
             <main className="flex-1 flex flex-col" style={commonStyle}>
                 <Header />
-                <div className="flex-1 p-4" key={refreshKey} style={commonStyle}>
+                <div className="flex-1 p-4" key={refreshKey} style={commonStyle} ref={contentRef}>
                     {children}
                 </div>
-                <Footer />
+                <Footer/>
             </main>
             <ConfigDialog
                 isOpen={isConfigDialogOpen}

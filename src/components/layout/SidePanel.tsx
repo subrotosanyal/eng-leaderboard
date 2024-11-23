@@ -1,15 +1,18 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaHome, FaBars, FaTimes, FaChartBar, FaCog } from 'react-icons/fa';
+import ThemeSwitcher from '../config/ThemeSwitcher';
+import ScreenshotButton from '../utils/ScreenshotButton';
 import { commonStyle } from '../styles/commonStyles';
 
 interface SidePanelProps {
     isMenuCollapsed: boolean;
     setIsMenuCollapsed: (collapsed: boolean) => void;
     setIsConfigDialogOpen: (open: boolean) => void;
+    targetRef: React.RefObject<HTMLDivElement>;
 }
 
-const SidePanel: React.FC<SidePanelProps> = ({ isMenuCollapsed, setIsMenuCollapsed, setIsConfigDialogOpen }) => {
+const SidePanel: React.FC<SidePanelProps> = ({ isMenuCollapsed, setIsMenuCollapsed, setIsConfigDialogOpen, targetRef }) => {
     const navigate = useNavigate();
 
     return (
@@ -22,22 +25,30 @@ const SidePanel: React.FC<SidePanelProps> = ({ isMenuCollapsed, setIsMenuCollaps
             <nav className="p-4" style={commonStyle}>
                 <ul>
                     <li className="mb-4">
-                        <button onClick={() => navigate('/')} className="flex items-center space-x-2" style={commonStyle}>
-                            <FaHome size={24} />
+                        <button onClick={() => navigate('/')} className="flex items-center space-x-2"
+                                style={commonStyle}>
+                            <FaHome size={24}/>
                             {!isMenuCollapsed && <span>Home</span>}
                         </button>
                     </li>
                     <li className="mb-4">
                         <Link to="/comparison" className="flex items-center space-x-2" style={commonStyle}>
-                            <FaChartBar size={24} />
+                            <FaChartBar size={24}/>
                             {!isMenuCollapsed && <span>Metric Comparison</span>}
                         </Link>
                     </li>
                     <li className="mb-4">
-                        <button onClick={() => setIsConfigDialogOpen(true)} className="flex items-center space-x-2" style={commonStyle}>
-                            <FaCog size={24} />
+                        <button onClick={() => setIsConfigDialogOpen(true)} className="flex items-center space-x-2"
+                                style={commonStyle}>
+                            <FaCog size={24}/>
                             {!isMenuCollapsed && <span>Config</span>}
                         </button>
+                    </li>
+                    <li className="mb-4">
+                        <ScreenshotButton targetRef={targetRef}/>
+                    </li>
+                    <li className="mb-4">
+                        <ThemeSwitcher/>
                     </li>
                 </ul>
             </nav>
