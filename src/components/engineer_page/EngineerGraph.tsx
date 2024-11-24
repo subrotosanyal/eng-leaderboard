@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Line } from 'react-chartjs-2';
+import Toggle from 'react-toggle';
+import 'react-toggle/style.css';
 import {
     BarElement,
     CategoryScale,
@@ -158,11 +160,11 @@ const EngineerGraph: React.FC<EngineerGraphProps> = ({ issues, jiraConfig, role 
                 <>
                     <div className="flex justify-between mb-4">
                         <div>
-                            <label>Group By:</label>
                             <select
                                 value={groupBy}
                                 onChange={(e) => setGroupBy(e.target.value as 'week' | 'month' | 'quarter')}
                                 style={commonStyle}
+                                className="border p-2 rounded w-full"
                             >
                                 <option value="week">Week</option>
                                 <option value="month">Month</option>
@@ -170,11 +172,11 @@ const EngineerGraph: React.FC<EngineerGraphProps> = ({ issues, jiraConfig, role 
                             </select>
                         </div>
                         <div>
-                            <label>Cumulative:</label>
-                            <input
-                                type="checkbox"
-                                checked={cumulative}
-                                onChange={(e) => setCumulative(e.target.checked)}
+                            <label className="mr-2">Cumulative:</label>
+                            <Toggle
+                                defaultChecked={cumulative}
+                                icons={false}
+                                onChange={() => setCumulative(!cumulative)}
                             />
                         </div>
                     </div>
