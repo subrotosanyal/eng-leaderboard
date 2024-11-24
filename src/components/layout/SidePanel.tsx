@@ -1,9 +1,9 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { FaHome, FaBars, FaTimes, FaChartBar, FaCog } from 'react-icons/fa';
+import {Link, useNavigate} from 'react-router-dom';
+import {FaBars, FaChartBar, FaCog, FaHome, FaTimes} from 'react-icons/fa';
 import ThemeSwitcher from '../config/ThemeSwitcher';
 import ScreenshotButton from '../utils/ScreenshotButton';
-import { commonStyle } from '../styles/commonStyles';
+import {commonStyle} from '../styles/commonStyles';
 
 interface SidePanelProps {
     isMenuCollapsed: boolean;
@@ -12,14 +12,21 @@ interface SidePanelProps {
     targetRef: React.RefObject<HTMLDivElement>;
 }
 
-const SidePanel: React.FC<SidePanelProps> = ({ isMenuCollapsed, setIsMenuCollapsed, setIsConfigDialogOpen, targetRef }) => {
+const SidePanel: React.FC<SidePanelProps> = ({
+                                                 isMenuCollapsed,
+                                                 setIsMenuCollapsed,
+                                                 setIsConfigDialogOpen,
+                                                 targetRef
+                                             }) => {
     const navigate = useNavigate();
 
     return (
-        <aside className={`text-white ${isMenuCollapsed ? 'w-16' : 'w-64'} transition-width duration-300 md:relative fixed bottom-0 md:bottom-auto md:top-0 left-0`} style={{ ...commonStyle, backgroundColor: 'var(--side-panel-bg)' }}>
+        <aside
+            className={`text-white ${isMenuCollapsed ? 'w-16' : 'w-64'} transition-width duration-300 md:relative fixed bottom-0 md:bottom-auto md:top-0 left-0`}
+            style={{...commonStyle, backgroundColor: 'var(--side-panel-bg)'}}>
             <div className="p-4 flex justify-between items-center" style={commonStyle}>
                 <button onClick={() => setIsMenuCollapsed(!isMenuCollapsed)}>
-                    {isMenuCollapsed ? <FaBars size={24} /> : <FaTimes size={24} />}
+                    {isMenuCollapsed ? <FaBars size={24}/> : <FaTimes size={24}/>}
                 </button>
             </div>
             <nav className="p-4" style={commonStyle}>
@@ -45,7 +52,7 @@ const SidePanel: React.FC<SidePanelProps> = ({ isMenuCollapsed, setIsMenuCollaps
                         </button>
                     </li>
                     <li className="mb-4">
-                        <ScreenshotButton targetRef={targetRef}/>
+                        <ScreenshotButton targetRef={targetRef} isMenuCollapsed={isMenuCollapsed}/>
                     </li>
                     <li className="mb-4">
                         <ThemeSwitcher/>

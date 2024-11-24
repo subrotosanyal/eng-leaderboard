@@ -5,10 +5,6 @@
     "/rest": {
       "target": "https://sightview.atlassian.net/",
       "changeOrigin": true
-    },
-    "/jobs": {
-      "target": "https://stackoverflow.com",
-      "changeOrigin": true
     }
   },
   "version": "0.0.0",
