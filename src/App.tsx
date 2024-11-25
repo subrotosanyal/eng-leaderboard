@@ -8,13 +8,26 @@ import EngineerDetailsPage from "./components/engineer_page/EngineerDetailsPage.
 import {JiraConfig, Role} from './types';
 
 const App: React.FC = () => {
-    const loadConfig = (): JiraConfig => ({
-        project: localStorage.getItem('jiraProject') || '',
-        board: localStorage.getItem('jiraBoard') || '',
-        developerField: JSON.parse(localStorage.getItem('jiraDeveloperField') || ''),
-        storyPointField: JSON.parse(localStorage.getItem('jiraStoryPointField') || ''),
-        testedByField: JSON.parse(localStorage.getItem('jiraTestedByField') || ''),
-    });
+    const loadConfig = (): JiraConfig => {
+        try {
+            return {
+                project: localStorage.getItem('jiraProject') || '',
+                board: localStorage.getItem('jiraBoard') || '',
+                developerField: JSON.parse(localStorage.getItem('jiraDeveloperField') || '""'),
+                storyPointField: JSON.parse(localStorage.getItem('jiraStoryPointField') || '""'),
+                testedByField: JSON.parse(localStorage.getItem('jiraTestedByField') || '""'),
+            };
+        } catch (error) {
+            console.error('Failed to load config:', error);
+            return {
+                project: '',
+                board: '',
+                developerField: JSON.parse("{'', '', ''}"),
+                storyPointField: JSON.parse("{'', '', ''}"),
+                testedByField: JSON.parse("{'', '', ''}"),
+            };
+        }
+    };
 
     const [jiraConfig, setJiraConfig] = useState<JiraConfig>(loadConfig);
     const [role, setRole] = useState<Role>(Role.Developer);
