@@ -6,14 +6,11 @@ function createWindow() {
     width: 800,
     height: 600,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
-    },
+      preload: path.join(__dirname, 'preload.js')
+    }
   });
 
-  mainWindow.loadURL('http://localhost:5173').catch((err) => {
-    console.error('Failed to load URL:', err);
-  });
-
+  mainWindow.loadFile(path.join(__dirname, 'dist', 'index.html'));
   mainWindow.webContents.openDevTools(); // Enable DevTools
 }
 

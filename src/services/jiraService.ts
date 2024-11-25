@@ -1,11 +1,11 @@
 import api from './api';
-import {closedTicketForAnEngineerATimeRangeJQL, queries} from './jiraQueries';
-import {isAfter, subMonths} from 'date-fns';
-import {Assignee, Engineer, Issue, JiraConfig, Role, Sprint, TimeframeOption,} from '../types';
-import {mockSprints, mockTimeframeStats} from '../mocks/data';
-import {config} from "../config/env";
+import { JIRA_API_PATHS } from './utils/jiraApiUrl';
+import { closedTicketForAnEngineerATimeRangeJQL, queries } from './jiraQueries';
+import { isAfter, subMonths } from 'date-fns';
+import { Assignee, Engineer, Issue, JiraConfig, Role, Sprint, TimeframeOption } from '../types';
+import { mockSprints, mockTimeframeStats } from '../mocks/data';
+import { config } from "../config/env";
 import { getStoryPointsPerDeveloper } from './utils/jiraUtils';
-
 
 export class JiraService {
     private readonly isConfigured: boolean;
@@ -39,7 +39,7 @@ export class JiraService {
 
         try {
             while (true) {
-                const response = await api.get(`/rest/agile/1.0/board/${this.jiraConfig.board}/sprint?state=active,closed&startAt=${startAt}&maxResults=${maxResults}`);
+                const response = await api.get(JIRA_API_PATHS.SPRINTS(this.jiraConfig.board, startAt, maxResults));
                 const fetchedSprints = response.data.values
                     .filter((sprint: Sprint) => sprint && sprint.startDate)
                     .map((sprint: Sprint) => ({
@@ -107,7 +107,7 @@ export class JiraService {
         const maxResults = 100;
 
         while (true) {
-            const response = await api.post('/rest/api/3/search', {
+            const response = await api.post(JIRA_API_PATHS.SEARCH, {
                 jql,
                 fields,
                 startAt,

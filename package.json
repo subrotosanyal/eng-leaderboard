@@ -2,7 +2,7 @@
   "name": "developer-leaderboard",
   "private": true,
   "proxy": {
-    "/rest": {
+    "/api/jira": {
       "target": "https://sightview.atlassian.net/",
       "changeOrigin": true
     }
@@ -11,16 +11,29 @@
   "version": "0.0.0",
   "main": "main.cjs",
   "scripts": {
-    "dev": "vite --host 0.0.0.0",
+    "dev": "vite",
     "build": "vite build",
-    "lint": "eslint .",
-    "preview": "vite preview",
+    "serve": "node middleware.cjs --trace-deprecation",
     "start": "electron ."
+  },
+  "build": {
+    "appId": "com.yourapp.id",
+    "files": [
+      "dist/**/*",
+      "main.cjs",
+      "preload.js"
+    ],
+    "directories": {
+      "buildResources": "build"
+    }
   },
   "dependencies": {
     "axios": "^1.7.7",
     "date-fns": "^3.3.1",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
     "html2canvas": "^1.4.1",
+    "http-proxy-middleware": "^3.0.3",
     "lucide-react": "^0.344.0",
     "react": "^18.3.1",
     "react-chartjs-2": "^5.2.0",
@@ -34,7 +47,6 @@
     "recharts": "^2.12.2"
   },
   "devDependencies": {
-    "electron": "^26.1.0",
     "@eslint/js": "^9.14.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
@@ -42,6 +54,8 @@
     "@types/react-toggle": "^4.0.5",
     "@vitejs/plugin-react": "^4.3.3",
     "autoprefixer": "^10.4.18",
+    "electron": "^26.1.0",
+    "electron-builder": "^25.1.8",
     "eslint": "^9.9.1",
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
     "eslint-plugin-react-refresh": "^0.4.11",

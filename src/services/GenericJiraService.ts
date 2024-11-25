@@ -1,5 +1,6 @@
 import {JiraField, UserDetails} from "../types";
 import api from "./api.ts";
+import {JIRA_API_PATHS} from "./utils/jiraApiUrl.ts";
 
 interface RawJiraField {
     id: string;
@@ -24,7 +25,7 @@ export class GenericJiraService {
 
     getJiraFields = async (): Promise<JiraField[]> => {
         try {
-            const response = await api.get<RawJiraField[]>('/rest/api/3/field');
+            const response = await api.get<RawJiraField[]>(JIRA_API_PATHS.FIELDS_GET);
             const fields = response.data;
             return fields.map(field => ({
                 key: field.key,
@@ -39,7 +40,7 @@ export class GenericJiraService {
 
     getUserDetails = async (userId: string): Promise<UserDetails> => {
         try {
-            const response = await api.get(`/rest/api/3/user?accountId=${userId}`);
+            const response = await api.get(JIRA_API_PATHS.ACCOUNT_DETAILS_GET(userId));
             return response.data as UserDetails;
         } catch (error) {
             console.error('Error fetching user details:', error);
