@@ -6,5 +6,10 @@ COPY package*.json ./
 RUN npm install
 
 COPY . .
-EXPOSE 5001
+RUN npm run build
+
+# Ensure the dist folder is copied
+RUN ls -la /app/dist
+
+EXPOSE 5000
 CMD ["npm", "run", "serve"]

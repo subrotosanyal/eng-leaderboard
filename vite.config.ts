@@ -7,8 +7,8 @@ export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, cwd(), ''); // Load .env variables
 
     if (!env.VITE_JIRA_BASE_URL) {
-        console.error('Error: VITE_JIRA_BASE_URL is not defined in .env');
-        process.exit(1);
+        //console.error('Error: VITE_JIRA_BASE_URL is not defined in .env');
+        //process.exit(1);
     }
 
     return {
