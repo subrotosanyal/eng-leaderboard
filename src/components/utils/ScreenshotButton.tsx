@@ -14,13 +14,7 @@ const ScreenshotButton: React.FC<ScreenshotButtonProps> = ({ targetRef, isMenuCo
             try {
                 const canvas = await html2canvas(targetRef.current, {
                     scale: 2,
-                    useCORS: true,
-                    onClone: (documentClone: Document) => {
-                        const images = documentClone.getElementsByTagName('img');
-                        for (let i = 0; i < images.length; i++) {
-                            images[i].crossOrigin = 'anonymous';
-                        }
-                    }
+                    useCORS: true
                 });
                 const link = document.createElement('a');
                 link.href = canvas.toDataURL('image/png');

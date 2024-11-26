@@ -6,16 +6,15 @@ const path = require('path');
 dotenv.config();
 
 const app = express();
-
 const distPath = path.join(__dirname, 'dist');
 const defaultJiraBaseUrl = process.env.VITE_JIRA_BASE_URL || 'https://your-jira-instance.atlassian.net';
 const PORT = process.env.VITE_MIDDLEWARE_PORT || 5000;
 
 let jiraBaseUrl = defaultJiraBaseUrl;
-console.log(jiraBaseUrl);
+
 if (!jiraBaseUrl) {
     console.error('Error: JIRA Base URL is undefined. Please check your configuration.');
-    process.exit(1); // Exit the application if JIRA Base URL is undefined
+    process.exit(1);
 }
 
 // Serve React build files
@@ -33,6 +32,10 @@ app.post('/update-config', express.json(), (req, res) => {
     }
 });
 
+function userDefinedRouter(req) {
+    return jiraBaseUrl;
+}
+
 // Proxy middleware for API calls
 app.use(
     '/api/jira',
@@ -44,6 +47,7 @@ app.use(
     },
     createProxyMiddleware({
         target: jiraBaseUrl,
+        router: userDefinedRouter,
         secure: false,
         changeOrigin: true,
         followRedirects: true,

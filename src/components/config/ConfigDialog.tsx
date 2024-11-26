@@ -1,172 +1,225 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import Select, { StylesConfig, GroupBase } from 'react-select';
+import { JiraConfig, JiraField } from '../../types';
+import { config } from '../../config/env';
 import { GenericJiraService } from '../../services/GenericJiraService';
-import type { JiraConfig, JiraField } from '../../types';
-import { commonStyle } from '../styles/commonStyles';
+import { useTheme } from '../../context/ThemeContext';
+import './ConfigDialog.css';
 
 interface ConfigDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: (newConfig: JiraConfig) => void;
+    open: boolean;
+    onClose: () => void;
 }
 
-const ConfigDialog: React.FC<ConfigDialogProps> = ({ isOpen, onClose, onSave }) => {
-  const [config, setConfig] = useState<JiraConfig>({
-    project: '',
-    board: '',
-    developerField: { key: '', name: '', clauseName: '' },
-    storyPointField: { key: '', name: '', clauseName: '' },
-    testedByField: { key: '', name: '', clauseName: '' },
-  });
-  const [fields, setFields] = useState<JiraField[]>([]);
-  const [searches, setSearches] = useState<{ [key: string]: string }>({
-    developerField: '',
-    storyPointField: '',
-    testedByField: '',
-  });
-  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const storedProject = localStorage.getItem('jiraProject');
-    const storedBoard = localStorage.getItem('jiraBoard');
-    const storedDeveloperField = localStorage.getItem('jiraDeveloperField');
-    const storedStoryPointField = localStorage.getItem('jiraStoryPointField');
-    const storedTestedByField = localStorage.getItem('jiraTestedByField');
-
-    setConfig({
-      project: storedProject || '',
-      board: storedBoard || '',
-      developerField: storedDeveloperField ? JSON.parse(storedDeveloperField) : { key: '', name: '' },
-      storyPointField: storedStoryPointField ? JSON.parse(storedStoryPointField) : { key: '', name: '' },
-      testedByField: storedTestedByField ? JSON.parse(storedTestedByField) : { key: '', name: '' },
+const ConfigDialog: React.FC<ConfigDialogProps> = ({ open, onClose }) => {
+    useTheme();
+    const [activeTab, setActiveTab] = useState(0);
+    const [jiraEmail, setJiraEmail] = useState(localStorage.getItem('jiraEmail') || config.jira.email);
+    const [jiraBaseUrl, setJiraBaseUrl] = useState(localStorage.getItem('jiraBaseUrl') || config.jira.baseUrl);
+    const [jiraApiToken, setJiraApiToken] = useState(localStorage.getItem('jiraApiToken') || config.jira.apiToken);
+    const [jiraConfig, setJiraConfig] = useState<JiraConfig>({
+        project: localStorage.getItem('jiraProject') || '',
+        board: localStorage.getItem('jiraBoard') || '',
+        developerField: JSON.parse(localStorage.getItem('jiraDeveloperField') || '{}') as JiraField,
+        storyPointField: JSON.parse(localStorage.getItem('jiraStoryPointField') || '{}') as JiraField,
+        testedByField: JSON.parse(localStorage.getItem('jiraTestedByField') || '{}') as JiraField,
     });
+    const [fields, setFields] = useState<JiraField[]>([]);
 
-    setSearches({
-      developerField: storedDeveloperField ? JSON.parse(storedDeveloperField).name : '',
-      storyPointField: storedStoryPointField ? JSON.parse(storedStoryPointField).name : '',
-      testedByField: storedTestedByField ? JSON.parse(storedTestedByField).name : '',
-    });
-  }, [isOpen]);
+    useEffect(() => {
+        if (activeTab === 1) {
+            const fetchFields = async () => {
+                try {
+                    const jiraService = new GenericJiraService();
+                    const fetchedFields = await jiraService.getJiraFields();
+                    setFields(fetchedFields.sort((a, b) => a.name.localeCompare(b.name)));
+                } catch (error) {
+                    console.error('Failed to fetch Jira fields:', error);
+                }
+            };
 
-  useEffect(() => {
-    if (!isOpen) return;
+            fetchFields().catch((err) => console.error('Error in fetching fields:', err));
+        }
+    }, [activeTab]);
 
-    const fetchFields = async () => {
-      try {
-        const jiraService = new GenericJiraService();
-        const fetchedFields = await jiraService.getJiraFields();
-        setFields(fetchedFields);
-      } catch (error) {
-        console.error('Failed to fetch Jira fields:', error);
-      }
+    const handleTabChange = (newValue: number) => {
+        setActiveTab(newValue);
     };
 
-    fetchFields();
-  }, [isOpen]);
+    const handleSaveFirstTab = async () => {
+        localStorage.setItem('jiraEmail', jiraEmail);
+        localStorage.setItem('jiraBaseUrl', jiraBaseUrl);
+        localStorage.setItem('jiraApiToken', jiraApiToken);
 
-  const handleInputChange = (fieldName: string, value: string) => {
-    setConfig((prevConfig) => ({ ...prevConfig, [fieldName]: value }));
-  };
+        try {
+            await axios.post('/update-config', { jiraBaseUrl });
+            console.log('Configuration updated successfully!');
+        } catch (error) {
+            console.error('Failed to update configuration:', error);
+        }
 
-  const handleDropdownSearchChange = (fieldName: string, value: string) => {
-    setSearches((prev) => ({ ...prev, [fieldName]: value }));
-    setActiveDropdown(fieldName);
-  };
+        onClose(); // Close the dialog
+        window.location.reload(); // Reload the page
+    };
 
-  const handleDropdownSelect = (fieldName: string, field: JiraField) => {
-    setConfig((prevConfig) => ({ ...prevConfig, [fieldName]: field }));
-    setSearches((prev) => ({ ...prev, [fieldName]: field.name }));
-    setActiveDropdown(null);
-  };
+    const handleSaveSecondTab = () => {
+        localStorage.setItem('jiraProject', jiraConfig.project);
+        localStorage.setItem('jiraBoard', jiraConfig.board);
+        localStorage.setItem('jiraDeveloperField', JSON.stringify(jiraConfig.developerField));
+        localStorage.setItem('jiraStoryPointField', JSON.stringify(jiraConfig.storyPointField));
+        localStorage.setItem('jiraTestedByField', JSON.stringify(jiraConfig.testedByField));
+        onClose(); // Close the dialog
+        window.location.reload(); // Reload the page
+    };
 
-  const handleSave = () => {
-    localStorage.setItem('jiraProject', config.project);
-    localStorage.setItem('jiraBoard', config.board);
-    localStorage.setItem('jiraDeveloperField', JSON.stringify(config.developerField));
-    localStorage.setItem('jiraStoryPointField', JSON.stringify(config.storyPointField));
-    localStorage.setItem('jiraTestedByField', JSON.stringify(config.testedByField));
+    const selectStyles: StylesConfig<JiraField, false, GroupBase<JiraField>> = {
+        control: (styles) => ({
+            ...styles,
+            backgroundColor: 'var(--bg-color)',
+            color: 'var(--text-color)',
+        }),
+        singleValue: (styles) => ({
+            ...styles,
+            color: 'var(--text-color)',
+        }),
+        menu: (styles) => ({
+            ...styles,
+            backgroundColor: 'var(--bg-color)',
+        }),
+        option: (styles, { isFocused }) => ({
+            ...styles,
+            backgroundColor: isFocused ? 'var(--border-color)' : undefined,
+            color: 'var(--text-color)',
+        }),
+    };
 
-    onSave(config);
-    onClose();
-  };
+    if (!open) return null;
 
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 flex items-center justify-center" style={commonStyle}>
-      <div className="bg-white p-6 rounded-lg shadow-lg w-96" style={commonStyle}>
-        <h2 className="text-xl font-bold mb-4" style={commonStyle}>Configuration</h2>
-
-        <div className="mb-4">
-          <label className="block text-gray-700 mb-1" style={commonStyle}>Project</label>
-          <input
-            type="text"
-            value={config.project}
-            onChange={(e) => handleInputChange('project', e.target.value)}
-            className="border p-2 rounded w-full"
-            style={commonStyle}
-          />
-        </div>
-
-        <div className="mb-4">
-          <label className="block text-gray-700 mb-1" style={commonStyle}>Board</label>
-          <input
-            type="text"
-            value={config.board}
-            onChange={(e) => handleInputChange('board', e.target.value)}
-            className="border p-2 rounded w-full"
-            style={commonStyle}
-          />
-        </div>
-
-        {['developerField', 'storyPointField', 'testedByField'].map((fieldName) => (
-          <div key={fieldName} className="mb-4 relative" style={commonStyle}>
-            <label className="block text-gray-700 mb-1" style={commonStyle}>
-              {fieldName === 'developerField' && 'Developer Field Name'}
-              {fieldName === 'storyPointField' && 'Story Point Field Name'}
-              {fieldName === 'testedByField' && 'Tested By Field Name'}
-            </label>
-            <input
-              type="text"
-              placeholder="Search..."
-              value={searches[fieldName]}
-              onChange={(e) => handleDropdownSearchChange(fieldName, e.target.value)}
-              className="border p-2 rounded w-full"
-              style={commonStyle}
-              onFocus={() => setActiveDropdown(fieldName)}
-            />
-            {activeDropdown === fieldName && searches[fieldName] && (
-              <div
-                className="absolute z-10 bg-white border border-gray-300 rounded shadow-lg max-h-48 overflow-y-auto w-full"
-                style={commonStyle}
-              >
-                {fields
-                  .filter((field) =>
-                    field.name.toLowerCase().includes(searches[fieldName].toLowerCase())
-                  )
-                  .map((field) => (
-                    <div
-                      key={field.key}
-                      onClick={() => handleDropdownSelect(fieldName, field)}
-                      className="cursor-pointer p-2 hover:bg-gray-200"
-                      style={commonStyle}
-                    >
-                      {field.key} - {field.clauseName} - {field.name}
+    return (
+        <div className="dialog-overlay">
+            <div className="dialog">
+                <div className="dialog-title">
+                    <h2>Configuration</h2>
+                    <button onClick={onClose} className="close-button">&times;</button>
+                </div>
+                <div className="dialog-content">
+                    <div className="tabs">
+                        <button
+                            className={`tab ${activeTab === 0 ? 'active' : ''}`}
+                            onClick={() => handleTabChange(0)}
+                        >
+                            Jira Configuration
+                        </button>
+                        <button
+                            className={`tab ${activeTab === 1 ? 'active' : ''}`}
+                            onClick={() => handleTabChange(1)}
+                            disabled={!jiraEmail || !jiraBaseUrl || !jiraApiToken}
+                        >
+                            Project Configuration
+                        </button>
                     </div>
-                  ))}
-              </div>
-            )}
-          </div>
-        ))}
-
-        <div className="flex justify-end space-x-2">
-          <button onClick={onClose} className="bg-gray-500 text-white px-4 py-2 rounded">Cancel</button>
-          <button onClick={handleSave} className="bg-blue-500 text-white px-4 py-2 rounded">Save</button>
+                    {activeTab === 0 && (
+                        <div className="tab-content">
+                            <input
+                                type="email"
+                                placeholder="Jira Email"
+                                value={jiraEmail}
+                                onChange={(e) => setJiraEmail(e.target.value)}
+                                className="input"
+                            />
+                            <input
+                                type="url"
+                                placeholder="Jira Base URL"
+                                value={jiraBaseUrl}
+                                onChange={(e) => setJiraBaseUrl(e.target.value)}
+                                className="input"
+                            />
+                            <input
+                                type="password"
+                                placeholder="Jira API Token"
+                                value={jiraApiToken}
+                                onChange={(e) => setJiraApiToken(e.target.value)}
+                                className="input"
+                            />
+                            <button onClick={handleSaveFirstTab} className="button">
+                                Save
+                            </button>
+                        </div>
+                    )}
+                    {activeTab === 1 && (
+                        <div className="tab-content">
+                            <input
+                                type="text"
+                                placeholder="Jira Project"
+                                value={jiraConfig.project}
+                                onChange={(e) => setJiraConfig({ ...jiraConfig, project: e.target.value })}
+                                className="input"
+                            />
+                            <input
+                                type="text"
+                                placeholder="Jira Board"
+                                value={jiraConfig.board}
+                                onChange={(e) => setJiraConfig({ ...jiraConfig, board: e.target.value })}
+                                className="input"
+                            />
+                            <div className="form-control">
+                                <label>Developed By</label>
+                                <Select
+                                    options={fields}
+                                    getOptionLabel={(field) => `${field.name} (${field.key}, ${field.clauseName})`}
+                                    getOptionValue={(field) => field.key}
+                                    value={fields.find(field => field.key === jiraConfig.developerField.key)}
+                                    onChange={(selectedOption) => {
+                                        if (selectedOption) {
+                                            setJiraConfig({ ...jiraConfig, developerField: { ...jiraConfig.developerField, key: selectedOption.key } });
+                                        }
+                                    }}
+                                    isSearchable
+                                    styles={selectStyles}
+                                />
+                            </div>
+                            <div className="form-control">
+                                <label>Story Point Field</label>
+                                <Select
+                                    options={fields}
+                                    getOptionLabel={(field) => `${field.name} (${field.key}, ${field.clauseName})`}
+                                    getOptionValue={(field) => field.key}
+                                    value={fields.find(field => field.key === jiraConfig.storyPointField.key)}
+                                    onChange={(selectedOption) => {
+                                        if (selectedOption) {
+                                            setJiraConfig({ ...jiraConfig, storyPointField: { ...jiraConfig.storyPointField, key: selectedOption.key } });
+                                        }
+                                    }}
+                                    isSearchable
+                                    styles={selectStyles}
+                                />
+                            </div>
+                            <div className="form-control">
+                                <label>Tested By Field</label>
+                                <Select
+                                    options={fields}
+                                    getOptionLabel={(field) => `${field.name} (${field.key}, ${field.clauseName})`}
+                                    getOptionValue={(field) => field.key}
+                                    value={fields.find(field => field.key === jiraConfig.testedByField.key)}
+                                    onChange={(selectedOption) => {
+                                        if (selectedOption) {
+                                            setJiraConfig({ ...jiraConfig, testedByField: { ...jiraConfig.testedByField, key: selectedOption.key } });
+                                        }
+                                    }}
+                                    isSearchable
+                                    styles={selectStyles}
+                                />
+                            </div>
+                            <button onClick={handleSaveSecondTab} className="button">
+                                Save
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default ConfigDialog;
