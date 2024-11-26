@@ -68,7 +68,7 @@ const MetricComparisonResult: React.FC<MetricComparisonResultProps> = ({ compari
                     <BarChart data={barData}>
                         <XAxis dataKey="metric" />
                         <YAxis />
-                        <Tooltip />
+                        <Tooltip contentStyle={commonStyle} />
                         <Bar dataKey="t1" name="Timeframe 1" fill={barColors[0]} />
                         <Bar dataKey="t2" name="Timeframe 2" fill={barColors[1]} />
                     </BarChart>
@@ -102,7 +102,7 @@ const MetricComparisonResult: React.FC<MetricComparisonResultProps> = ({ compari
                     ]}>
                         <XAxis dataKey="metric" />
                         <YAxis />
-                        <Tooltip />
+                        <Tooltip contentStyle={commonStyle}/>
                         <Bar dataKey="t1" name="Timeframe 1" fill={barColors[0]} />
                         <Bar dataKey="t2" name="Timeframe 2" fill={barColors[1]} />
                     </BarChart>

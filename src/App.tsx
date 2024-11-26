@@ -8,23 +8,25 @@ import EngineerDetailsPage from "./components/engineer_page/EngineerDetailsPage.
 import {JiraConfig, Role} from './types';
 
 const App: React.FC = () => {
+    const defaultJiraField = {key: '', name: '', clauseName: ''};
+
     const loadConfig = (): JiraConfig => {
         try {
             return {
                 project: localStorage.getItem('jiraProject') || '',
                 board: localStorage.getItem('jiraBoard') || '',
-                developerField: JSON.parse(localStorage.getItem('jiraDeveloperField') || '""'),
-                storyPointField: JSON.parse(localStorage.getItem('jiraStoryPointField') || '""'),
-                testedByField: JSON.parse(localStorage.getItem('jiraTestedByField') || '""'),
+                developerField: JSON.parse(localStorage.getItem('jiraDeveloperField') || JSON.stringify(defaultJiraField)),
+                storyPointField: JSON.parse(localStorage.getItem('jiraStoryPointField') || JSON.stringify(defaultJiraField)),
+                testedByField: JSON.parse(localStorage.getItem('jiraTestedByField') || JSON.stringify(defaultJiraField)),
             };
         } catch (error) {
             console.error('Failed to load config:', error);
             return {
                 project: '',
                 board: '',
-                developerField: JSON.parse("{'', '', ''}"),
-                storyPointField: JSON.parse("{'', '', ''}"),
-                testedByField: JSON.parse("{'', '', ''}"),
+                developerField: defaultJiraField,
+                storyPointField: defaultJiraField,
+                testedByField: defaultJiraField,
             };
         }
     };

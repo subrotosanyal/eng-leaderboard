@@ -46,6 +46,7 @@ app.use(
         target: jiraBaseUrl,
         secure: false,
         changeOrigin: true,
+        followRedirects: true,
         headers: {
             'X-Atlassian-Token': 'no-check',
             origin: `http://localhost:${PORT}`,
