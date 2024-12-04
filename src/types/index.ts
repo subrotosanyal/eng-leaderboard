@@ -62,6 +62,9 @@ export interface JiraConfig {
     developerField: JiraField;
     storyPointField: JiraField;
     testedByField: JiraField;
+    baseUrl?: string;
+    email?: string;
+    apiToken?: string;
 }
 
 export enum Role {
@@ -97,6 +100,7 @@ export interface Metrics {
     overallTeamVelocity: number;
     individualContributions: IndividualContribution[];
 }
+
 export interface JiraField {
     key: string;
     name: string;

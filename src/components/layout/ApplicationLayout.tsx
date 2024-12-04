@@ -5,7 +5,12 @@ import SidePanel from './SidePanel';
 import Header from './Header';
 import Footer from './Footer';
 
-const ApplicationLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+interface ApplicationLayoutProps {
+    children: React.ReactNode;
+    setIsMockData?: (isMock: boolean) => void;
+}
+
+const ApplicationLayout: React.FC<ApplicationLayoutProps> = ({ children, setIsMockData }) => {
     const [isMenuCollapsed, setIsMenuCollapsed] = useState(false);
     const { theme } = useTheme();
     const contentRef = useRef<HTMLDivElement>(null);
@@ -16,6 +21,7 @@ const ApplicationLayout: React.FC<{ children: React.ReactNode }> = ({ children }
                 isMenuCollapsed={isMenuCollapsed}
                 setIsMenuCollapsed={setIsMenuCollapsed}
                 targetRef={contentRef}
+                setIsMockData={setIsMockData}
             />
             <main className="flex-1 flex flex-col" style={commonStyle}>
                 <Header />

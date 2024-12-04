@@ -18,6 +18,9 @@ const App: React.FC = () => {
                 developerField: JSON.parse(localStorage.getItem('jiraDeveloperField') || JSON.stringify(defaultJiraField)),
                 storyPointField: JSON.parse(localStorage.getItem('jiraStoryPointField') || JSON.stringify(defaultJiraField)),
                 testedByField: JSON.parse(localStorage.getItem('jiraTestedByField') || JSON.stringify(defaultJiraField)),
+                baseUrl: config.jira.baseUrl,
+                email: config.jira.email,
+                apiToken: config.jira.apiToken,
             };
         } catch (error) {
             console.error('Failed to load config:', error);
@@ -27,6 +30,9 @@ const App: React.FC = () => {
                 developerField: defaultJiraField,
                 storyPointField: defaultJiraField,
                 testedByField: defaultJiraField,
+                baseUrl: config.jira.baseUrl,
+                email: config.jira.email,
+                apiToken: config.jira.apiToken,
             };
         }
     };
@@ -73,7 +79,11 @@ const App: React.FC = () => {
                         }
                     />
                     <Route path="/comparison" element={
-                        <MetricComparisonPage jiraConfig={jiraConfig} role={role} setIsMockData={setIsMockData}/>
+                        <MetricComparisonPage 
+                            jiraConfig={jiraConfig} 
+                            setIsMockData={setIsMockData}
+                            role={role}
+                        />
                     }
                     />
                 </Routes>

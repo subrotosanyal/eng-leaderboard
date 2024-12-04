@@ -8,7 +8,8 @@ import MockDataStrip from './MockDataStrip';
 import SearchBar from '../commom_components/SearchBar';
 import RoleSlider from './RoleSlider';
 import {commonStyle} from '../styles/commonStyles';
-import {JiraService} from '../../services/jiraService';
+import {TicketingServiceFactory, TicketingSystem} from '../../services/factory/TicketingServiceFactory';
+import {config} from '../../config/env';
 import type {Engineer, JiraConfig, Role, Sprint, TimeframeOption} from '../../types';
 import ApplicationLayout from '../layout/ApplicationLayout';
 
@@ -29,59 +30,66 @@ const MainPage: React.FC<MainPageProps> = ({
                                                setIsMockData,
                                            }) => {
     const [sprints, setSprints] = useState<Sprint[]>([]);
-    const [selectedTimeframe, setSelectedTimeframe] = useState<TimeframeOption>({
-        id: 'loading',
-        label: 'Loading...',
-        value: '',
-        type: 'sprint',
-    });
+    const [selectedTimeframe, setSelectedTimeframe] = useState<TimeframeOption | null>(null);
     const [developers, setDevelopers] = useState<Engineer[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [selectedNames, setSelectedNames] = useState<{ name: string; avatar: string }[]>([]);
-    useEffect(() => {
-        const initializeData = async () => {
-            try {
-                const jiraService = new JiraService(jiraConfig, setIsMockData);
-                const fetchedSprints = await jiraService.getSprints();
-                setSprints(fetchedSprints);
-
-                const currentSprint = fetchedSprints[0];
-                setSelectedTimeframe({
-                    id: currentSprint.id,
-                    label: currentSprint.name,
-                    value: currentSprint.id,
-                    type: 'sprint',
-                });
-            } catch (err) {
-                setError('Failed to fetch sprints. Please check your JIRA configuration.');
-                console.error('Error fetching sprints:', err);
-            }
-        };
-
-        initializeData().catch((err) => console.error('Error in initializeData:', err));
-    }, [jiraConfig, setIsMockData]);
 
     useEffect(() => {
-        const fetchTimeframeData = async () => {
-            if (selectedTimeframe.id === 'loading') return;
-
+        const fetchSprints = async () => {
             try {
                 setLoading(true);
-                setError(null);
-                const jiraService = new JiraService(jiraConfig, setIsMockData);
-                const data = await jiraService.getTimeframeData(selectedTimeframe, role);
-                setDevelopers(data);
-                setSelectedNames(data.map((dev) => ({name: dev.name, avatar: dev.avatar})));
+                const ticketingService = TicketingServiceFactory.createService(
+                    TicketingSystem.JIRA,
+                    {...jiraConfig, ...config.jira},
+                    setIsMockData
+                );
+                const sprintData = await ticketingService.getSprints();
+                setSprints(sprintData);
+                if (sprintData.length > 0 && !selectedTimeframe) {
+                    const latestSprint = sprintData[0];
+                    setSelectedTimeframe({
+                        id: latestSprint.id,
+                        label: latestSprint.name,
+                        value: latestSprint.id,
+                        type: 'sprint'
+                    });
+                }
             } catch (err) {
-                setError('Failed to fetch leaderboard data. Please check your JIRA configuration.');
-                console.error('Error fetching JIRA data:', err);
+                setError('Failed to fetch sprints');
+                console.error(err);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchTimeframeData().catch((err) => console.error('Error in fetchTimeframeData:', err));
+        fetchSprints();
+    }, [jiraConfig, setIsMockData, selectedTimeframe]);
+
+    useEffect(() => {
+        const fetchTimeframeData = async () => {
+            if (!selectedTimeframe) return;
+
+            setLoading(true);
+            try {
+                const ticketingService = TicketingServiceFactory.createService(
+                    TicketingSystem.JIRA,
+                    {...jiraConfig, ...config.jira},
+                    setIsMockData
+                );
+                const fetchedDevelopers = await ticketingService.getTimeframeData(selectedTimeframe, role);
+                setDevelopers(fetchedDevelopers);
+                setSelectedNames(fetchedDevelopers.map((dev) => ({name: dev.name, avatar: dev.avatar})));
+            } catch (err) {
+                setError('Failed to fetch leaderboard data');
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchTimeframeData();
     }, [selectedTimeframe, jiraConfig, role, setIsMockData]);
 
     if (error) {
@@ -96,7 +104,7 @@ const MainPage: React.FC<MainPageProps> = ({
     }
 
     return (
-        <ApplicationLayout>
+        <ApplicationLayout setIsMockData={setIsMockData}>
             <div className="min-h-screen bg-gray-100" style={commonStyle}>
                 <div className="container mx-auto px-4 py-8">
                     <div className="flex items-center justify-between mb-8">
@@ -106,7 +114,12 @@ const MainPage: React.FC<MainPageProps> = ({
                         </div>
                         <div className="flex items-center space-x-3">
                             <TimeframeSelector
-                                selected={selectedTimeframe}
+                                selected={selectedTimeframe || {
+                                    id: 'loading',
+                                    label: 'Loading...',
+                                    value: 'loading',
+                                    type: 'sprint'
+                                }}
                                 sprints={sprints}
                                 onChange={setSelectedTimeframe}
                                 isLoading={loading}
@@ -133,16 +146,16 @@ const MainPage: React.FC<MainPageProps> = ({
                     ) : (
                         <>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                                {developers.filter((dev) =>
-                                    selectedNames.some((selected) => selected.name === dev.name)
-                                ).map((developer, index) => (
-                                    <LeaderCard
-                                        key={developer.id}
-                                        developer={developer}
-                                        rank={index + 1}
-                                        tickets={developer.issues}
-                                    />
-                                ))}
+                                {developers
+                                    .filter((dev) => selectedNames.some((selected) => selected.name === dev.name))
+                                    .map((developer, index) => (
+                                        <LeaderCard
+                                            key={developer.id}
+                                            developer={developer}
+                                            rank={index + 1}
+                                            tickets={developer.issues}
+                                        />
+                                    ))}
                             </div>
 
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
