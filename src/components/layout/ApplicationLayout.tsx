@@ -10,7 +10,7 @@ interface ApplicationLayoutProps {
     setIsMockData?: (isMock: boolean) => void;
 }
 
-const ApplicationLayout: React.FC<ApplicationLayoutProps> = ({ children, setIsMockData }) => {
+const ApplicationLayout: React.FC<ApplicationLayoutProps> = ({ children}) => {
     const [isMenuCollapsed, setIsMenuCollapsed] = useState(false);
     const { theme } = useTheme();
     const contentRef = useRef<HTMLDivElement>(null);
@@ -21,7 +21,6 @@ const ApplicationLayout: React.FC<ApplicationLayoutProps> = ({ children, setIsMo
                 isMenuCollapsed={isMenuCollapsed}
                 setIsMenuCollapsed={setIsMenuCollapsed}
                 targetRef={contentRef}
-                setIsMockData={setIsMockData}
             />
             <main className="flex-1 flex flex-col" style={commonStyle}>
                 <Header />

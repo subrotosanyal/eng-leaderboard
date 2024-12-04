@@ -4,7 +4,7 @@ import LeaderCard from './LeaderCard';
 import PerformanceChart from './PerformanceChart';
 import TimeframeSelector from './TimeframeSelector';
 import TeamStats from './TeamStats';
-import MockDataStrip from './MockDataStrip';
+import MockDataStrip from '../layout/MockDataStrip';
 import SearchBar from '../commom_components/SearchBar';
 import RoleSlider from './RoleSlider';
 import {commonStyle} from '../styles/commonStyles';
@@ -42,8 +42,7 @@ const MainPage: React.FC<MainPageProps> = ({
                 setLoading(true);
                 const ticketingService = TicketingServiceFactory.createService(
                     TicketingSystem.JIRA,
-                    {...jiraConfig, ...config.jira},
-                    setIsMockData
+                    {...jiraConfig, ...config.jira}
                 );
                 const sprintData = await ticketingService.getSprints();
                 setSprints(sprintData);
@@ -75,8 +74,7 @@ const MainPage: React.FC<MainPageProps> = ({
             try {
                 const ticketingService = TicketingServiceFactory.createService(
                     TicketingSystem.JIRA,
-                    {...jiraConfig, ...config.jira},
-                    setIsMockData
+                    {...jiraConfig, ...config.jira}
                 );
                 const fetchedDevelopers = await ticketingService.getTimeframeData(selectedTimeframe, role);
                 setDevelopers(fetchedDevelopers);

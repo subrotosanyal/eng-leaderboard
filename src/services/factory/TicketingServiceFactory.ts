@@ -7,10 +7,10 @@ export enum TicketingSystem {
 }
 
 export class TicketingServiceFactory {
-    static createService(system: TicketingSystem, config: ITicketingConfig, setIsMockData: (isMock: boolean) => void): ITicketingService {
+    static createService(system: TicketingSystem, config: ITicketingConfig): ITicketingService {
         switch (system) {
             case TicketingSystem.JIRA:
-                return new JiraService(config, setIsMockData);
+                return new JiraService(config);
             default:
                 throw new Error(`Unsupported ticketing system: ${system}`);
         }

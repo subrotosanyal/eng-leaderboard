@@ -31,7 +31,7 @@ export class JiraService implements ITicketingService {
     private readonly isConfigured: boolean;
     private readonly setIsMockData: (isMock: boolean) => void;
 
-    constructor(private config: ITicketingConfig, setIsMockData: (isMock: boolean) => void) {
+    constructor(private config: ITicketingConfig) {
         this.isConfigured = Boolean(
             this.config.project &&
             this.config.board &&
@@ -40,7 +40,7 @@ export class JiraService implements ITicketingService {
             this.config.email &&
             this.config.apiToken
         );
-        this.setIsMockData = setIsMockData;
+        this.setIsMockData = () => {};
         if (!this.isConfigured) {
             console.warn('JIRA configuration is incomplete. Using mock data instead.');
             this.setIsMockData(true);

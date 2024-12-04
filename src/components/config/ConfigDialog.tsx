@@ -10,10 +10,9 @@ import './ConfigDialog.css';
 interface ConfigDialogProps {
     open: boolean;
     onClose: () => void;
-    setIsMockData: (isMock: boolean) => void;
 }
 
-const ConfigDialog: React.FC<ConfigDialogProps> = ({ open, onClose, setIsMockData }) => {
+const ConfigDialog: React.FC<ConfigDialogProps> = ({ open, onClose }) => {
     useTheme();
     const [activeTab, setActiveTab] = useState(0);
     const [jiraEmail, setJiraEmail] = useState(localStorage.getItem('jiraEmail') || config.jira.email);
@@ -45,7 +44,6 @@ const ConfigDialog: React.FC<ConfigDialogProps> = ({ open, onClose, setIsMockDat
                             storyPointField: jiraConfig.storyPointField,
                             testedByField: jiraConfig.testedByField,
                         },
-                        setIsMockData
                     );
                     const fetchedFields = await service.getJiraFields();
                     setFields(fetchedFields.sort((a, b) => a.name.localeCompare(b.name)));

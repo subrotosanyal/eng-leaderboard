@@ -10,14 +10,12 @@ interface SidePanelProps {
     isMenuCollapsed: boolean;
     setIsMenuCollapsed: (collapsed: boolean) => void;
     targetRef: React.RefObject<HTMLDivElement>;
-    setIsMockData?: (isMock: boolean) => void;
 }
 
 const SidePanel: React.FC<SidePanelProps> = ({
     isMenuCollapsed,
     setIsMenuCollapsed,
     targetRef,
-    setIsMockData
 }) => {
     const [isConfigDialogOpen, setIsConfigDialogOpen] = useState(false);
     const navigate = useNavigate();
@@ -61,8 +59,7 @@ const SidePanel: React.FC<SidePanelProps> = ({
             </nav>
             <ConfigDialog 
                 open={isConfigDialogOpen} 
-                onClose={() => setIsConfigDialogOpen(false)} 
-                setIsMockData={setIsMockData || (() => {})}
+                onClose={() => setIsConfigDialogOpen(false)}
             />
         </aside>
     );

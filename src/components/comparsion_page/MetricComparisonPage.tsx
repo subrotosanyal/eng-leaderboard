@@ -23,8 +23,7 @@ const MetricComparisonPage: React.FC<MetricComparisonPageProps> = ({ jiraConfig,
         try {
             const ticketingService: ITicketingService = TicketingServiceFactory.createService(
                 TicketingSystem.JIRA,
-                { ...jiraConfig, ...config.jira },
-                setIsMockData
+                { ...jiraConfig, ...config.jira }
             );
             
             const [data1, data2] = await Promise.all([

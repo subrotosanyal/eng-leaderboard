@@ -14,7 +14,6 @@ const EngineerDetailsPage: React.FC<{ jiraConfig: JiraConfig; role: Role }> = ({
     const [tickets, setTickets] = useState<Issue[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [isMockData, setIsMockData] = useState(false);
     useNavigate();
 
     useEffect(() => {
@@ -28,8 +27,7 @@ const EngineerDetailsPage: React.FC<{ jiraConfig: JiraConfig; role: Role }> = ({
             try {
                 const ticketingService = TicketingServiceFactory.createService(
                     TicketingSystem.JIRA,
-                    { ...jiraConfig, ...config.jira },
-                    () => {}
+                    { ...jiraConfig, ...config.jira }
                 );
 
                 const [userDetailsResponse, ticketsResponse] = await Promise.all([
@@ -52,7 +50,7 @@ const EngineerDetailsPage: React.FC<{ jiraConfig: JiraConfig; role: Role }> = ({
 
     if (loading) {
         return (
-            <ApplicationLayout setIsMockData={setIsMockData}>
+            <ApplicationLayout>
                 <div className="container mx-auto p-4" style={commonStyle}>
                     <div className="flex justify-center items-center h-64">
                         <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-indigo-500"></div>
@@ -64,7 +62,7 @@ const EngineerDetailsPage: React.FC<{ jiraConfig: JiraConfig; role: Role }> = ({
 
     if (error) {
         return (
-            <ApplicationLayout setIsMockData={setIsMockData}>
+            <ApplicationLayout>
                 <div className="container mx-auto p-4" style={commonStyle}>
                     <div style={{ color: 'red', padding: '20px', textAlign: 'center' }}>
                         Error: {error}
@@ -75,7 +73,7 @@ const EngineerDetailsPage: React.FC<{ jiraConfig: JiraConfig; role: Role }> = ({
     }
 
     return (
-        <ApplicationLayout setIsMockData={setIsMockData}>
+        <ApplicationLayout>
             <div className="container mx-auto p-4" style={commonStyle}>
                 {userDetails && (
                     <Card title={userDetails.displayName}>
