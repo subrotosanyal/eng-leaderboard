@@ -1,22 +1,38 @@
 import { useState } from 'react';
 import DateRangeSelector from '../commom_components/DateRangeSelector';
-import { DateRange } from '../../types';
+import { TimeframeOption } from '../../types';
 import { LuGitCompare } from 'react-icons/lu';
 import { FaSpinner } from 'react-icons/fa';
 import Card from '../commom_components/Card';
 
-const TimeframeComparison = ({ onCompare }: { onCompare: (timeframe1: DateRange, timeframe2: DateRange) => void }) => {
-    const [timeframe1, setTimeframe1] = useState<DateRange>({ start: null, end: null });
-    const [timeframe2, setTimeframe2] = useState<DateRange>({ start: null, end: null });
-    const [loading, setLoading] = useState(false);
+const TimeframeComparison = ({ onCompare, isLoading }: { 
+    onCompare: (timeframe1: TimeframeOption, timeframe2: TimeframeOption) => void,
+    isLoading: boolean 
+}) => {
+    const [timeframe1, setTimeframe1] = useState<TimeframeOption>({ id: '', label: '', value: '', type: 'custom-range' });
+    const [timeframe2, setTimeframe2] = useState<TimeframeOption>({ id: '', label: '', value: '', type: 'custom-range' });
 
     const handleCompare = async () => {
-        setLoading(true);
         await onCompare(timeframe1, timeframe2);
-        setLoading(false);
     };
 
-    const isCompareDisabled = !timeframe1.start || !timeframe1.end || !timeframe2.start || !timeframe2.end || loading;
+    const isCompareDisabled = !timeframe1.value || !timeframe2.value || isLoading;
+
+    const getDateFromValue = (value: string, index: number): Date | null => {
+        if (!value) return null;
+        const dates = value.split('|');
+        const dateStr = dates[index];
+        if (!dateStr) return null;
+        const date = new Date(dateStr);
+        return isNaN(date.getTime()) ? null : date;
+    };
+
+    const formatDateToString = (date: Date | null, currentValue: string, index: number): string => {
+        if (!date) return currentValue;
+        const dates = currentValue ? currentValue.split('|') : ['', ''];
+        dates[index] = date.toISOString();
+        return dates.join('|');
+    };
 
     return (
         <Card title="">
@@ -24,28 +40,58 @@ const TimeframeComparison = ({ onCompare }: { onCompare: (timeframe1: DateRange,
                 <div>
                     <label className="block mb-2 font-bold">Period 1</label>
                     <DateRangeSelector
-                        startDate={timeframe1.start}
-                        endDate={timeframe1.end}
-                        setStartDate={(date) => setTimeframe1({ ...timeframe1, start: date })}
-                        setEndDate={(date) => setTimeframe1({ ...timeframe1, end: date })}
+                        startDate={getDateFromValue(timeframe1.value, 0)}
+                        endDate={getDateFromValue(timeframe1.value, 1)}
+                        setStartDate={(date) => 
+                            setTimeframe1({
+                                ...timeframe1,
+                                value: formatDateToString(date, timeframe1.value, 0),
+                                type: 'custom-range'
+                            })
+                        }
+                        setEndDate={(date) => 
+                            setTimeframe1({
+                                ...timeframe1,
+                                value: formatDateToString(date, timeframe1.value, 1),
+                                type: 'custom-range'
+                            })
+                        }
                     />
                 </div>
                 <div>
                     <label className="block mb-2 font-bold">Period 2</label>
                     <DateRangeSelector
-                        startDate={timeframe2.start}
-                        endDate={timeframe2.end}
-                        setStartDate={(date) => setTimeframe2({ ...timeframe2, start: date })}
-                        setEndDate={(date) => setTimeframe2({ ...timeframe2, end: date })}
+                        startDate={getDateFromValue(timeframe2.value, 0)}
+                        endDate={getDateFromValue(timeframe2.value, 1)}
+                        setStartDate={(date) => 
+                            setTimeframe2({
+                                ...timeframe2,
+                                value: formatDateToString(date, timeframe2.value, 0),
+                                type: 'custom-range'
+                            })
+                        }
+                        setEndDate={(date) => 
+                            setTimeframe2({
+                                ...timeframe2,
+                                value: formatDateToString(date, timeframe2.value, 1),
+                                type: 'custom-range'
+                            })
+                        }
                     />
                 </div>
                 <button
                     onClick={handleCompare}
-                    className="flex items-center px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 disabled:opacity-50"
                     disabled={isCompareDisabled}
+                    className={`flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md 
+                        ${isCompareDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'} 
+                        transition-all duration-200`}
                 >
-                    {loading ? <FaSpinner className="animate-spin mr-2" /> : <LuGitCompare className="mr-2" />}
-                    Compare
+                    {isLoading ? (
+                        <FaSpinner className="animate-spin h-5 w-5" />
+                    ) : (
+                        <LuGitCompare className="h-5 w-5" />
+                    )}
+                    <span>{isLoading ? 'Comparing...' : 'Compare'}</span>
                 </button>
             </div>
         </Card>

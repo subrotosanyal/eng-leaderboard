@@ -13,17 +13,26 @@ import {
     PointElement,
     Tooltip,
 } from 'chart.js';
-import { Issue, JiraConfig, Role } from '../../types';
-import { getStoryPointsPerDeveloper } from '../../services/utils/jiraUtils';
+import { Issue, Role } from '../../types';
+import { getStoryPointsPerDeveloper } from '../../services/implementation/utils/jiraUtils';
 import Card from '../commom_components/Card';
-import {commonStyle} from "../styles/commonStyles.ts";
+import { commonStyle } from "../styles/commonStyles.ts";
+import { ITicketingConfig } from '../../services/interfaces/ITicketingConfig';
 
 // Register required Chart.js components
-Chart.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Tooltip, Legend);
+Chart.register(
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    BarElement,
+    Legend,
+    Tooltip
+);
 
 interface EngineerGraphProps {
     issues: Issue[];
-    jiraConfig: JiraConfig;
+    jiraConfig: ITicketingConfig;
     role: Role;
 }
 
@@ -64,16 +73,21 @@ const EngineerGraph: React.FC<EngineerGraphProps> = ({ issues, jiraConfig, role 
                     startOfWeek.setDate(date.getDate() - date.getDay());
                     const endOfWeek = new Date(startOfWeek);
                     endOfWeek.setDate(startOfWeek.getDate() + 6);
-                    key = `${startOfWeek.toLocaleDateString()} - ${endOfWeek.toLocaleDateString()}`;
+                    // Store in a sortable format: YYYY-MM-DD as the key, but display differently
+                    const displayKey = `${startOfWeek.toLocaleDateString()} - ${endOfWeek.toLocaleDateString()}`;
+                    key = `${startOfWeek.getFullYear()}-${String(startOfWeek.getMonth() + 1).padStart(2, '0')}-${String(startOfWeek.getDate()).padStart(2, '0')}|${displayKey}`;
                     break;
                 }
                 case 'month': {
-                    key = date.toLocaleString('default', { month: 'long', year: 'numeric' });
+                    // Store in sortable format: YYYY-MM as the key, but display differently
+                    const displayKey = date.toLocaleString('default', { month: 'long', year: 'numeric' });
+                    key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}|${displayKey}`;
                     break;
                 }
                 case 'quarter': {
                     const quarter = Math.ceil((date.getMonth() + 1) / 3);
-                    key = `${date.getFullYear()}-Q${quarter}`;
+                    // Store in sortable format: YYYY-Q# as the key
+                    key = `${date.getFullYear()}-${quarter}|${date.getFullYear()}-Q${quarter}`;
                     break;
                 }
                 default: {
@@ -89,14 +103,19 @@ const EngineerGraph: React.FC<EngineerGraphProps> = ({ issues, jiraConfig, role 
             groupedData[key].storyPoints += getStoryPointsPerDeveloper(issue, jiraConfig, role) || 0;
         });
 
-        const labels = Object.keys(groupedData).sort((a, b) => {
-            const [yearA, quarterA] = a.split('-Q').map(Number);
-            const [yearB, quarterB] = b.split('-Q').map(Number);
-            return yearA === yearB ? quarterA - quarterB : yearA - yearB;
+        const sortedLabels = Object.keys(groupedData).sort((a, b) => {
+            // Extract the sortable part before the pipe
+            const sortKeyA = a.split('|')[0];
+            const sortKeyB = b.split('|')[0];
+            return sortKeyA.localeCompare(sortKeyB);
         });
 
-        const ticketsData = labels.map((label) => groupedData[label].tickets);
-        const storyPointsData = labels.map((label) => groupedData[label].storyPoints);
+        // Extract display labels
+        const labels = sortedLabels.map(key => key.includes('|') ? key.split('|')[1] : key);
+
+        // Use sortedLabels for data mapping to maintain order
+        const ticketsData = sortedLabels.map((label) => groupedData[label].tickets);
+        const storyPointsData = sortedLabels.map((label) => groupedData[label].storyPoints);
 
         if (cumulative) {
             for (let i = 1; i < ticketsData.length; i++) {

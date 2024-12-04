@@ -4,17 +4,18 @@ import LeaderCard from './LeaderCard';
 import PerformanceChart from './PerformanceChart';
 import TimeframeSelector from './TimeframeSelector';
 import TeamStats from './TeamStats';
-import MockDataStrip from './MockDataStrip';
 import SearchBar from '../commom_components/SearchBar';
 import RoleSlider from './RoleSlider';
 import {commonStyle} from '../styles/commonStyles';
-import {JiraService} from '../../services/jiraService';
-import type {Engineer, JiraConfig, Role, Sprint, TimeframeOption} from '../../types';
+import {TicketingServiceFactory, TicketingSystem} from '../../services/factory/TicketingServiceFactory';
+import {ITicketingConfig} from '../../services/interfaces/ITicketingConfig';
+import type {Engineer, Role, Sprint, TimeframeOption} from '../../types';
 import ApplicationLayout from '../layout/ApplicationLayout';
+import {ConfigurationService} from "../../services/ConfigurationService.ts";
 
 interface MainPageProps {
-    jiraConfig: JiraConfig;
-    handleConfigSave: (newConfig: JiraConfig) => void;
+    jiraConfig: ITicketingConfig;
+    handleConfigSave: (config: ITicketingConfig) => void;
     role: Role;
     setRole: (role: Role) => void;
     isMockData: boolean;
@@ -25,63 +26,67 @@ const MainPage: React.FC<MainPageProps> = ({
                                                jiraConfig,
                                                role,
                                                setRole,
-                                               isMockData,
                                                setIsMockData,
                                            }) => {
     const [sprints, setSprints] = useState<Sprint[]>([]);
-    const [selectedTimeframe, setSelectedTimeframe] = useState<TimeframeOption>({
-        id: 'loading',
-        label: 'Loading...',
-        value: '',
-        type: 'sprint',
-    });
+    const [selectedTimeframe, setSelectedTimeframe] = useState<TimeframeOption | null>(null);
     const [developers, setDevelopers] = useState<Engineer[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [selectedNames, setSelectedNames] = useState<{ name: string; avatar: string }[]>([]);
-    useEffect(() => {
-        const initializeData = async () => {
-            try {
-                const jiraService = new JiraService(jiraConfig, setIsMockData);
-                const fetchedSprints = await jiraService.getSprints();
-                setSprints(fetchedSprints);
-
-                const currentSprint = fetchedSprints[0];
-                setSelectedTimeframe({
-                    id: currentSprint.id,
-                    label: currentSprint.name,
-                    value: currentSprint.id,
-                    type: 'sprint',
-                });
-            } catch (err) {
-                setError('Failed to fetch sprints. Please check your JIRA configuration.');
-                console.error('Error fetching sprints:', err);
-            }
-        };
-
-        initializeData().catch((err) => console.error('Error in initializeData:', err));
-    }, [jiraConfig, setIsMockData]);
 
     useEffect(() => {
-        const fetchTimeframeData = async () => {
-            if (selectedTimeframe.id === 'loading') return;
-
+        const fetchSprints = async () => {
             try {
                 setLoading(true);
-                setError(null);
-                const jiraService = new JiraService(jiraConfig, setIsMockData);
-                const data = await jiraService.getTimeframeData(selectedTimeframe, role);
-                setDevelopers(data);
-                setSelectedNames(data.map((dev) => ({name: dev.name, avatar: dev.avatar})));
+                const ticketingService = TicketingServiceFactory.createService(
+                    TicketingSystem.JIRA,
+                    {...jiraConfig, ...ConfigurationService.loadConfig()}
+                );
+                const sprintData = await ticketingService.getSprints();
+                setSprints(sprintData);
+                if (sprintData.length > 0 && !selectedTimeframe) {
+                    const latestSprint = sprintData[0];
+                    setSelectedTimeframe({
+                        id: latestSprint.id,
+                        label: latestSprint.name,
+                        value: latestSprint.id,
+                        type: 'sprint'
+                    });
+                }
             } catch (err) {
-                setError('Failed to fetch leaderboard data. Please check your JIRA configuration.');
-                console.error('Error fetching JIRA data:', err);
+                setError('Failed to fetch sprints');
+                console.error(err);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchTimeframeData().catch((err) => console.error('Error in fetchTimeframeData:', err));
+        fetchSprints();
+    }, [jiraConfig, setIsMockData, selectedTimeframe]);
+
+    useEffect(() => {
+        const fetchTimeframeData = async () => {
+            if (!selectedTimeframe) return;
+
+            setLoading(true);
+            try {
+                const ticketingService = TicketingServiceFactory.createService(
+                    TicketingSystem.JIRA,
+                    {...jiraConfig, ...ConfigurationService.loadConfig()}
+                );
+                const fetchedDevelopers = await ticketingService.getTimeframeData(selectedTimeframe, role);
+                setDevelopers(fetchedDevelopers);
+                setSelectedNames(fetchedDevelopers.map((dev) => ({name: dev.name, avatar: dev.avatar})));
+            } catch (err) {
+                setError('Failed to fetch leaderboard data');
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchTimeframeData();
     }, [selectedTimeframe, jiraConfig, role, setIsMockData]);
 
     if (error) {
@@ -96,7 +101,7 @@ const MainPage: React.FC<MainPageProps> = ({
     }
 
     return (
-        <ApplicationLayout>
+        <ApplicationLayout setIsMockData={setIsMockData}>
             <div className="min-h-screen bg-gray-100" style={commonStyle}>
                 <div className="container mx-auto px-4 py-8">
                     <div className="flex items-center justify-between mb-8">
@@ -106,7 +111,12 @@ const MainPage: React.FC<MainPageProps> = ({
                         </div>
                         <div className="flex items-center space-x-3">
                             <TimeframeSelector
-                                selected={selectedTimeframe}
+                                selected={selectedTimeframe || {
+                                    id: 'loading',
+                                    label: 'Loading...',
+                                    value: 'loading',
+                                    type: 'sprint'
+                                }}
                                 sprints={sprints}
                                 onChange={setSelectedTimeframe}
                                 isLoading={loading}
@@ -123,7 +133,6 @@ const MainPage: React.FC<MainPageProps> = ({
                     </div>
 
                     <RoleSlider role={role} setRole={setRole}/>
-                    <MockDataStrip isMockData={isMockData}/>
 
                     {loading ? (
                         <div className="flex justify-center items-center h-64">
@@ -133,16 +142,16 @@ const MainPage: React.FC<MainPageProps> = ({
                     ) : (
                         <>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                                {developers.filter((dev) =>
-                                    selectedNames.some((selected) => selected.name === dev.name)
-                                ).map((developer, index) => (
-                                    <LeaderCard
-                                        key={developer.id}
-                                        developer={developer}
-                                        rank={index + 1}
-                                        tickets={developer.issues}
-                                    />
-                                ))}
+                                {developers
+                                    .filter((dev) => selectedNames.some((selected) => selected.name === dev.name))
+                                    .map((developer, index) => (
+                                        <LeaderCard
+                                            key={developer.id}
+                                            developer={developer}
+                                            rank={index + 1}
+                                            tickets={developer.issues}
+                                        />
+                                    ))}
                             </div>
 
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

@@ -1,12 +1,12 @@
 import { Medal, Trophy } from 'lucide-react';
 import type { Engineer, Issue } from '../../types';
-import { config } from '../../config/env';
 import React from 'react';
 import { commonStyle } from '../styles/commonStyles';
 import Card from '../commom_components/Card';
 import { Tooltip } from 'react-tooltip';
 import StatCard from '../commom_components/StatCard';
 import { useNavigate } from 'react-router-dom';
+import {ConfigurationService} from "../../services/ConfigurationService.ts";
 
 interface LeaderCardProps {
     developer: Engineer;
@@ -35,7 +35,7 @@ const LeaderCard: React.FC<LeaderCardProps> = ({ developer, rank }) => {
     };
 
     const handleLinkClick = () => {
-        const baseUrl = config.jira.baseUrl;
+        const baseUrl = ConfigurationService.loadConfig().baseUrl;
         const issueKeys = developer.issues.map(issue => issue.key).join(',');
         const jql = `id in (${issueKeys})`;
         const url = `${baseUrl}/issues/?jql=${encodeURIComponent(jql)}`;

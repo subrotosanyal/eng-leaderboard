@@ -1,30 +1,58 @@
 import api from './api';
-import { JIRA_API_PATHS } from './utils/jiraApiUrl';
-import { closedTicketForAnEngineerATimeRangeJQL, queries } from './jiraQueries';
-import { isAfter, subMonths } from 'date-fns';
-import { Assignee, Engineer, Issue, JiraConfig, Role, Sprint, TimeframeOption } from '../types';
-import { mockSprints, mockTimeframeStats } from '../mocks/data';
-import { config } from "../config/env";
-import { getStoryPointsPerDeveloper } from './utils/jiraUtils';
+import {JIRA_API_PATHS} from './utils/jiraApiUrl';
+import {closedTicketForAnEngineerATimeRangeJQL, closedTicketInATimeRangeJQL, queries} from './jiraQueries';
+import {format, isAfter, subMonths} from 'date-fns';
+import {Assignee, ComparisonResult, Engineer, Issue, JiraField, Role, Sprint, TimeframeOption} from '../../types';
+import {mockSprints, mockTimeframeStats} from '../../mocks/data';
+import {getStoryPointsPerDeveloper} from './utils/jiraUtils';
+import {ITicketingService} from '../interfaces/ITicketingService';
+import {ITicketingConfig} from '../interfaces/ITicketingConfig';
+import {MetricsComparator} from '../MetricsComparator';
+import { store } from '../../store/store';
+import { setIsMockData } from '../../store/mockDataSlice';
 
-export class JiraService {
+interface RawJiraField {
+    id: string;
+    key: string;
+    name: string;
+    untranslatedName: string;
+    custom: boolean;
+    orderable: boolean;
+    navigable: boolean;
+    searchable: boolean;
+    clauseNames: string[];
+    schema: {
+        type: string;
+        items?: string;
+        custom?: string;
+        customId?: number;
+    };
+}
+export class JiraService implements ITicketingService {
     private readonly isConfigured: boolean;
     private readonly setIsMockData: (isMock: boolean) => void;
 
-    constructor(private jiraConfig: JiraConfig, setIsMockData: (isMock: boolean) => void) {
+    constructor(private config: ITicketingConfig) {
         this.isConfigured = Boolean(
-            jiraConfig.project &&
-            jiraConfig.board &&
-            jiraConfig.storyPointField &&
-            config.jira.baseUrl &&
-            config.jira.email &&
-            config.jira.apiToken
+            this.config.project &&
+            this.config.board &&
+            this.config.storyPointField &&
+            this.config.baseUrl &&
+            this.config.email &&
+            this.config.apiToken
         );
-        this.setIsMockData = setIsMockData;
+        
+        this.setIsMockData = (isMock: boolean) => {
+            store.dispatch(setIsMockData(isMock));
+        };
         if (!this.isConfigured) {
             console.warn('JIRA configuration is incomplete. Using mock data instead.');
             this.setIsMockData(true);
         }
+    }
+
+    isServiceConfigured(): boolean {
+        return this.isConfigured;
     }
 
     async getSprints(): Promise<Sprint[]> {
@@ -39,7 +67,7 @@ export class JiraService {
 
         try {
             while (true) {
-                const response = await api.get(JIRA_API_PATHS.SPRINTS(this.jiraConfig.board, startAt, maxResults));
+                const response = await api.get(JIRA_API_PATHS.SPRINTS(this.config.board, startAt, maxResults));
                 const fetchedSprints = response.data.values
                     .filter((sprint: Sprint) => sprint && sprint.startDate)
                     .map((sprint: Sprint) => ({
@@ -79,10 +107,10 @@ export class JiraService {
 
             switch (timeframe.type) {
                 case 'sprint':
-                    jql = queries.sprintIssues(timeframe.value, this.jiraConfig);
+                    jql = queries.sprintIssues(timeframe.value, this.config);
                     break;
                 case 'custom-range':
-                    jql = queries.customDateRange(timeframe.value, this.jiraConfig);
+                    jql = queries.customDateRange(timeframe.value, this.config);
                     break;
             }
 
@@ -98,9 +126,9 @@ export class JiraService {
 
     async fetchIssues(jql: string): Promise<Issue[]> {
         const fields = ['assignee', 'status', 'updated', 'issuetype', 'resolutiondate'];
-        if (this.jiraConfig.storyPointField) fields.push(this.jiraConfig.storyPointField.key);
-        if (this.jiraConfig.developerField) fields.push(this.jiraConfig.developerField.key);
-        if (this.jiraConfig.testedByField) fields.push(this.jiraConfig.testedByField.key);
+        if (this.config.storyPointField) fields.push(this.config.storyPointField.key);
+        if (this.config.developerField) fields.push(this.config.developerField.key);
+        if (this.config.testedByField) fields.push(this.config.testedByField.key);
 
         const issues: Issue[] = [];
         let startAt = 0;
@@ -140,7 +168,7 @@ export class JiraService {
         }>();
 
         issues.forEach(issue => {
-            const field = role === Role.Developer ? this.jiraConfig.developerField : this.jiraConfig.testedByField;
+            const field = role === Role.Developer ? this.config.developerField : this.config.testedByField;
             const developers: Assignee[] = issue.fields[field.key] as Assignee[] || [];
             const assignee: Assignee | null = issue.fields.assignee;
 
@@ -148,7 +176,7 @@ export class JiraService {
 
             if (assignedDevelopers.length === 0) return;
 
-            const storyPointsPerDeveloper = getStoryPointsPerDeveloper(issue, this.jiraConfig, role);
+            const storyPointsPerDeveloper = getStoryPointsPerDeveloper(issue, this.config, role);
 
             assignedDevelopers.forEach(developer => {
                 const devData = devMap.get(developer.accountId) || {
@@ -184,11 +212,92 @@ export class JiraService {
             }));
     }
 
-    async getClosedTicketsForEngineer(engineerAccountId: string, jiraConfig: JiraConfig, role: Role): Promise<Issue[]> {
+    async getClosedTicketsForEngineer(engineerAccountId: string, role: Role): Promise<Issue[]> {
         const endDate = new Date();
         const startDate = subMonths(endDate, 12);
-        const jql = closedTicketForAnEngineerATimeRangeJQL(startDate.toDateString(), endDate.toDateString(), jiraConfig.project, engineerAccountId, role == Role.Developer ? jiraConfig.developerField.clauseName : jiraConfig.testedByField.clauseName);
+
+        const fieldName = role === Role.Developer
+            ? this.config.developerField?.clauseName
+            : this.config.testedByField?.clauseName;
+
+        if (!fieldName) {
+            console.warn(`Field name for role ${role} is not configured.`);
+        }
+
+        const jql = closedTicketForAnEngineerATimeRangeJQL(
+            format(startDate, 'yyyy-MM-dd'),
+            format(endDate, 'yyyy-MM-dd'),
+            this.config.project,
+            engineerAccountId,
+            fieldName
+        );
 
         return await this.fetchIssues(jql);
     }
+
+    async getUserDetails(userId: string) {
+        if (!this.isConfigured) {
+            // Return mock data or throw an error if not configured
+            return null;
+        }
+
+        try {
+            const response = await api.get(JIRA_API_PATHS.ACCOUNT_DETAILS_GET(userId));
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching user details:', error);
+            return null;
+        }
+    }
+
+    async getComparisonMetrics(
+        startDate1: Date,
+        endDate1: Date | null,
+        startDate2: Date,
+        endDate2: Date | null,
+        role: Role = Role.Developer
+    ): Promise<ComparisonResult> {
+        const timeframe1Data = await this.getTimeframeDataByDates(startDate1, endDate1, role);
+        const timeframe2Data = await this.getTimeframeDataByDates(startDate2, endDate2, role);
+
+        return MetricsComparator.compareMetricsData(timeframe1Data, timeframe2Data);
+    }
+
+    private async getTimeframeDataByDates(startDate: Date, endDate: Date | null, role: Role): Promise<Engineer[]> {
+        const formattedStartDate = format(startDate, 'yyyy-MM-dd');
+        const formattedEndDate = endDate ? format(endDate, 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd');
+
+        const fieldName = role === Role.Developer
+            ? this.config.developerField?.clauseName
+            : this.config.testedByField?.clauseName;
+
+        if (!fieldName) {
+            console.warn(`Field name for role ${role} is not configured.`);
+            return [];
+        }
+
+        const jql = closedTicketInATimeRangeJQL(
+            formattedStartDate,
+            formattedEndDate,
+            this.config.project,
+        );
+
+        const issues = await this.fetchIssues(jql);
+        return this.processIssues(issues, role);
+    }
+
+    async getJiraFields(): Promise<JiraField[]> {
+        try {
+            const response = await api.get<RawJiraField[]>(JIRA_API_PATHS.FIELDS_GET);
+            const fields = response.data;
+            return fields.map(field => ({
+                key: field.key,
+                name: field.name,
+                clauseName: field.clauseNames.length > 0 ? field.clauseNames[0] : ''
+            }));
+        } catch (error) {
+            console.error('Error fetching JIRA fields:', error);
+            throw error;
+        }
+    };
 }

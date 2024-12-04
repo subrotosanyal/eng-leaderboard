@@ -1,38 +1,50 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Select, { StylesConfig, GroupBase } from 'react-select';
-import { JiraConfig, JiraField } from '../../types';
-import { config } from '../../config/env';
-import { GenericJiraService } from '../../services/GenericJiraService';
+import { JiraField } from '../../types';
+import { ITicketingConfig } from '../../services/interfaces/ITicketingConfig';
+import { TicketingServiceFactory, TicketingSystem } from '../../services/factory/TicketingServiceFactory';
 import { useTheme } from '../../context/ThemeContext';
+import { Dialog } from '@headlessui/react';
 import './ConfigDialog.css';
+import {ConfigurationService} from "../../services/ConfigurationService.ts";
 
 interface ConfigDialogProps {
-    open: boolean;
+    isOpen: boolean;
     onClose: () => void;
+    onSave: (config: ITicketingConfig) => void;
+    initialConfig: ITicketingConfig;
 }
 
-const ConfigDialog: React.FC<ConfigDialogProps> = ({ open, onClose }) => {
+const ConfigDialog: React.FC<ConfigDialogProps> = ({
+    isOpen,
+    onClose,
+    onSave,
+    initialConfig
+}) => {
     useTheme();
     const [activeTab, setActiveTab] = useState(0);
-    const [jiraEmail, setJiraEmail] = useState(localStorage.getItem('jiraEmail') || config.jira.email);
-    const [jiraBaseUrl, setJiraBaseUrl] = useState(localStorage.getItem('jiraBaseUrl') || config.jira.baseUrl);
-    const [jiraApiToken, setJiraApiToken] = useState(localStorage.getItem('jiraApiToken') || config.jira.apiToken);
-    const [jiraConfig, setJiraConfig] = useState<JiraConfig>({
-        project: localStorage.getItem('jiraProject') || '',
-        board: localStorage.getItem('jiraBoard') || '',
-        developerField: JSON.parse(localStorage.getItem('jiraDeveloperField') || '{}') as JiraField,
-        storyPointField: JSON.parse(localStorage.getItem('jiraStoryPointField') || '{}') as JiraField,
-        testedByField: JSON.parse(localStorage.getItem('jiraTestedByField') || '{}') as JiraField,
-    });
+    const [jiraConfig, setJiraConfig] = useState<ITicketingConfig>(initialConfig);
     const [fields, setFields] = useState<JiraField[]>([]);
 
     useEffect(() => {
         if (activeTab === 1) {
             const fetchFields = async () => {
                 try {
-                    const jiraService = new GenericJiraService();
-                    const fetchedFields = await jiraService.getJiraFields();
+                    const service = TicketingServiceFactory.createService(
+                        TicketingSystem.JIRA,
+                        {
+                            baseUrl: jiraConfig.baseUrl || ConfigurationService.loadConfig().baseUrl,
+                            email: jiraConfig.email || ConfigurationService.loadConfig().email,
+                            apiToken: jiraConfig.apiToken || ConfigurationService.loadConfig().apiToken,
+                            project: jiraConfig.project,
+                            board: jiraConfig.board,
+                            developerField: jiraConfig.developerField,
+                            storyPointField: jiraConfig.storyPointField,
+                            testedByField: jiraConfig.testedByField,
+                        },
+                    );
+                    const fetchedFields = await service.getJiraFields();
                     setFields(fetchedFields.sort((a, b) => a.name.localeCompare(b.name)));
                 } catch (error) {
                     console.error('Failed to fetch Jira fields:', error);
@@ -41,20 +53,19 @@ const ConfigDialog: React.FC<ConfigDialogProps> = ({ open, onClose }) => {
 
             fetchFields().catch((err) => console.error('Error in fetching fields:', err));
         }
-    }, [activeTab]);
+    }, [activeTab, jiraConfig]);
 
     const handleTabChange = (newValue: number) => {
         setActiveTab(newValue);
     };
 
     const handleSaveFirstTab = async () => {
-        localStorage.setItem('jiraEmail', jiraEmail);
-        localStorage.setItem('jiraBaseUrl', jiraBaseUrl);
-        localStorage.setItem('jiraApiToken', jiraApiToken);
+        localStorage.setItem('jiraEmail', jiraConfig.email ?? '');
+        localStorage.setItem('jiraBaseUrl', jiraConfig.baseUrl ?? '');
+        localStorage.setItem('jiraApiToken', jiraConfig.apiToken ?? '');
 
         try {
-            await axios.post('/update-config', { jiraBaseUrl });
-            console.log('Configuration updated successfully!');
+            await axios.post('/update-config', { jiraBaseUrl: jiraConfig.baseUrl });
         } catch (error) {
             console.error('Failed to update configuration:', error);
         }
@@ -64,13 +75,15 @@ const ConfigDialog: React.FC<ConfigDialogProps> = ({ open, onClose }) => {
     };
 
     const handleSaveSecondTab = () => {
-        localStorage.setItem('jiraProject', jiraConfig.project);
-        localStorage.setItem('jiraBoard', jiraConfig.board);
-        localStorage.setItem('jiraDeveloperField', JSON.stringify(jiraConfig.developerField));
-        localStorage.setItem('jiraStoryPointField', JSON.stringify(jiraConfig.storyPointField));
-        localStorage.setItem('jiraTestedByField', JSON.stringify(jiraConfig.testedByField));
-        onClose(); // Close the dialog
-        window.location.reload(); // Reload the page
+        localStorage.setItem('jiraProject', jiraConfig.project ?? '');
+        localStorage.setItem('jiraBoard', jiraConfig.board ?? '');
+        localStorage.setItem('jiraDeveloperField', JSON.stringify(jiraConfig.developerField ?? {}));
+        localStorage.setItem('jiraStoryPointField', JSON.stringify(jiraConfig.storyPointField ?? {}));
+        localStorage.setItem('jiraTestedByField', JSON.stringify(jiraConfig.testedByField ?? {}));
+        
+        onSave(jiraConfig);
+        onClose();
+        window.location.reload();
     };
 
     const selectStyles: StylesConfig<JiraField, false, GroupBase<JiraField>> = {
@@ -94,10 +107,10 @@ const ConfigDialog: React.FC<ConfigDialogProps> = ({ open, onClose }) => {
         }),
     };
 
-    if (!open) return null;
+    if (!isOpen) return null;
 
     return (
-        <div className="dialog-overlay">
+        <Dialog open={isOpen} onClose={onClose} className="dialog-overlay">
             <div className="dialog">
                 <div className="dialog-title">
                     <h2>Configuration</h2>
@@ -114,7 +127,7 @@ const ConfigDialog: React.FC<ConfigDialogProps> = ({ open, onClose }) => {
                         <button
                             className={`tab ${activeTab === 1 ? 'active' : ''}`}
                             onClick={() => handleTabChange(1)}
-                            disabled={!jiraEmail || !jiraBaseUrl || !jiraApiToken}
+                            disabled={!jiraConfig.email || !jiraConfig.baseUrl || !jiraConfig.apiToken}
                         >
                             Project Configuration
                         </button>
@@ -124,22 +137,22 @@ const ConfigDialog: React.FC<ConfigDialogProps> = ({ open, onClose }) => {
                             <input
                                 type="email"
                                 placeholder="Jira Email"
-                                value={jiraEmail}
-                                onChange={(e) => setJiraEmail(e.target.value)}
+                                value={jiraConfig.email}
+                                onChange={(e) => setJiraConfig({ ...jiraConfig, email: e.target.value })}
                                 className="input"
                             />
                             <input
                                 type="url"
                                 placeholder="Jira Base URL"
-                                value={jiraBaseUrl}
-                                onChange={(e) => setJiraBaseUrl(e.target.value)}
+                                value={jiraConfig.baseUrl}
+                                onChange={(e) => setJiraConfig({ ...jiraConfig, baseUrl: e.target.value })}
                                 className="input"
                             />
                             <input
                                 type="password"
                                 placeholder="Jira API Token"
-                                value={jiraApiToken}
-                                onChange={(e) => setJiraApiToken(e.target.value)}
+                                value={jiraConfig.apiToken}
+                                onChange={(e) => setJiraConfig({ ...jiraConfig, apiToken: e.target.value })}
                                 className="input"
                             />
                             <button onClick={handleSaveFirstTab} className="button">
@@ -165,14 +178,17 @@ const ConfigDialog: React.FC<ConfigDialogProps> = ({ open, onClose }) => {
                             />
                             <div className="form-control">
                                 <label>Developed By</label>
-                                <Select
+                                <Select<JiraField>
                                     options={fields}
-                                    getOptionLabel={(field) => `${field.name} (${field.key}, ${field.clauseName})`}
+                                    getOptionLabel={(field) => `${field.name} (${field.key})`}
                                     getOptionValue={(field) => field.key}
                                     value={fields.find(field => field.key === jiraConfig.developerField.key)}
                                     onChange={(selectedOption) => {
                                         if (selectedOption) {
-                                            setJiraConfig({ ...jiraConfig, developerField: { ...jiraConfig.developerField, key: selectedOption.key } });
+                                            setJiraConfig(prevConfig => ({
+                                                ...prevConfig,
+                                                developerField: selectedOption
+                                            }));
                                         }
                                     }}
                                     isSearchable
@@ -181,14 +197,17 @@ const ConfigDialog: React.FC<ConfigDialogProps> = ({ open, onClose }) => {
                             </div>
                             <div className="form-control">
                                 <label>Story Point Field</label>
-                                <Select
+                                <Select<JiraField>
                                     options={fields}
-                                    getOptionLabel={(field) => `${field.name} (${field.key}, ${field.clauseName})`}
+                                    getOptionLabel={(field) => `${field.name} (${field.key})`}
                                     getOptionValue={(field) => field.key}
                                     value={fields.find(field => field.key === jiraConfig.storyPointField.key)}
                                     onChange={(selectedOption) => {
                                         if (selectedOption) {
-                                            setJiraConfig({ ...jiraConfig, storyPointField: { ...jiraConfig.storyPointField, key: selectedOption.key } });
+                                            setJiraConfig(prevConfig => ({
+                                                ...prevConfig,
+                                                storyPointField: selectedOption
+                                            }));
                                         }
                                     }}
                                     isSearchable
@@ -196,15 +215,18 @@ const ConfigDialog: React.FC<ConfigDialogProps> = ({ open, onClose }) => {
                                 />
                             </div>
                             <div className="form-control">
-                                <label>Tested By Field</label>
-                                <Select
+                                <label>Tested By</label>
+                                <Select<JiraField>
                                     options={fields}
-                                    getOptionLabel={(field) => `${field.name} (${field.key}, ${field.clauseName})`}
+                                    getOptionLabel={(field) => `${field.name} (${field.key})`}
                                     getOptionValue={(field) => field.key}
                                     value={fields.find(field => field.key === jiraConfig.testedByField.key)}
                                     onChange={(selectedOption) => {
                                         if (selectedOption) {
-                                            setJiraConfig({ ...jiraConfig, testedByField: { ...jiraConfig.testedByField, key: selectedOption.key } });
+                                            setJiraConfig(prevConfig => ({
+                                                ...prevConfig,
+                                                testedByField: selectedOption
+                                            }));
                                         }
                                     }}
                                     isSearchable
@@ -218,7 +240,7 @@ const ConfigDialog: React.FC<ConfigDialogProps> = ({ open, onClose }) => {
                     )}
                 </div>
             </div>
-        </div>
+        </Dialog>
     );
 };
 
