@@ -1,4 +1,6 @@
 import React, {useEffect, useState} from 'react';
+import {Provider} from 'react-redux';
+import {store} from './store/store';
 import {BrowserRouter as Router, Route, Routes} from 'react-router-dom';
 import {ThemeProvider} from './context/ThemeContext';
 import {config} from './config/env';
@@ -60,35 +62,37 @@ const App: React.FC = () => {
     };
 
     return (
-        <ThemeProvider>
-            <Router>
-                <Routes>
-                    <Route path="/engineer/:engineerId"
-                           element={<EngineerDetailsPage jiraConfig={jiraConfig} role={role}/>}/>
-                    <Route
-                        path="/"
-                        element={
-                            <MainPage
-                                jiraConfig={jiraConfig}
-                                handleConfigSave={handleConfigSave}
-                                role={role}
-                                setRole={setRole}
-                                isMockData={isMockData}
+        <Provider store={store}>
+            <ThemeProvider>
+                <Router>
+                    <Routes>
+                        <Route path="/engineer/:engineerId"
+                               element={<EngineerDetailsPage jiraConfig={jiraConfig} role={role}/>}/>
+                        <Route
+                            path="/"
+                            element={
+                                <MainPage
+                                    jiraConfig={jiraConfig}
+                                    handleConfigSave={handleConfigSave}
+                                    role={role}
+                                    setRole={setRole}
+                                    isMockData={isMockData}
+                                    setIsMockData={setIsMockData}
+                                />
+                            }
+                        />
+                        <Route path="/comparison" element={
+                            <MetricComparisonPage 
+                                jiraConfig={jiraConfig} 
                                 setIsMockData={setIsMockData}
+                                role={role}
                             />
                         }
-                    />
-                    <Route path="/comparison" element={
-                        <MetricComparisonPage 
-                            jiraConfig={jiraConfig} 
-                            setIsMockData={setIsMockData}
-                            role={role}
                         />
-                    }
-                    />
-                </Routes>
-            </Router>
-        </ThemeProvider>
+                    </Routes>
+                </Router>
+            </ThemeProvider>
+        </Provider>
     );
 };
 

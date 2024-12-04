@@ -8,7 +8,8 @@ import {getStoryPointsPerDeveloper} from './utils/jiraUtils';
 import {ITicketingService} from './interfaces/ITicketingService';
 import {ITicketingConfig} from './interfaces/ITicketingConfig';
 import {MetricsComparator} from './MetricsComparator';
-
+import { store } from '../store/store';
+import { setIsMockData } from '../store/mockDataSlice';
 
 interface RawJiraField {
     id: string;
@@ -40,7 +41,10 @@ export class JiraService implements ITicketingService {
             this.config.email &&
             this.config.apiToken
         );
-        this.setIsMockData = () => {};
+        
+        this.setIsMockData = (isMock: boolean) => {
+            store.dispatch(setIsMockData(isMock));
+        };
         if (!this.isConfigured) {
             console.warn('JIRA configuration is incomplete. Using mock data instead.');
             this.setIsMockData(true);
