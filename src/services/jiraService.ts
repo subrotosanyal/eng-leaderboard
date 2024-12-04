@@ -235,7 +235,7 @@ export class JiraService implements ITicketingService {
         return await this.fetchIssues(jql);
     }
 
-    async getUserDetails(userId: string): Promise<any> {
+    async getUserDetails(userId: string) {
         if (!this.isConfigured) {
             // Return mock data or throw an error if not configured
             return null;
