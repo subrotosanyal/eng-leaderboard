@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { TicketingServiceFactory, TicketingSystem } from '../../services/factory/TicketingServiceFactory';
-import { config } from '../../config/env';
 import Card from '../commom_components/Card';
 import EngineerGraph from './EngineerGraph';
 import { commonStyle } from '../styles/commonStyles';
 import { Issue, Role, UserDetails } from '../../types';
 import { ITicketingConfig } from '../../services/interfaces/ITicketingConfig';
 import ApplicationLayout from "../layout/ApplicationLayout.tsx";
+import {ConfigurationService} from "../../services/ConfigurationService.ts";
 
 interface EngineerDetailsPageProps {
     jiraConfig: ITicketingConfig;
@@ -36,7 +36,7 @@ const EngineerDetailsPage: React.FC<EngineerDetailsPageProps> = ({
             try {
                 const ticketingService = TicketingServiceFactory.createService(
                     TicketingSystem.JIRA,
-                    { ...jiraConfig, ...config.jira }
+                    { ...jiraConfig, ...ConfigurationService.loadConfig() }
                 );
 
                 const [userDetailsResponse, ticketsResponse] = await Promise.all([

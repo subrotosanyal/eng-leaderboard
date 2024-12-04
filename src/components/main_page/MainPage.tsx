@@ -8,10 +8,10 @@ import SearchBar from '../commom_components/SearchBar';
 import RoleSlider from './RoleSlider';
 import {commonStyle} from '../styles/commonStyles';
 import {TicketingServiceFactory, TicketingSystem} from '../../services/factory/TicketingServiceFactory';
-import {config} from '../../config/env';
 import {ITicketingConfig} from '../../services/interfaces/ITicketingConfig';
 import type {Engineer, Role, Sprint, TimeframeOption} from '../../types';
 import ApplicationLayout from '../layout/ApplicationLayout';
+import {ConfigurationService} from "../../services/ConfigurationService.ts";
 
 interface MainPageProps {
     jiraConfig: ITicketingConfig;
@@ -41,7 +41,7 @@ const MainPage: React.FC<MainPageProps> = ({
                 setLoading(true);
                 const ticketingService = TicketingServiceFactory.createService(
                     TicketingSystem.JIRA,
-                    {...jiraConfig, ...config.jira}
+                    {...jiraConfig, ...ConfigurationService.loadConfig()}
                 );
                 const sprintData = await ticketingService.getSprints();
                 setSprints(sprintData);
@@ -73,7 +73,7 @@ const MainPage: React.FC<MainPageProps> = ({
             try {
                 const ticketingService = TicketingServiceFactory.createService(
                     TicketingSystem.JIRA,
-                    {...jiraConfig, ...config.jira}
+                    {...jiraConfig, ...ConfigurationService.loadConfig()}
                 );
                 const fetchedDevelopers = await ticketingService.getTimeframeData(selectedTimeframe, role);
                 setDevelopers(fetchedDevelopers);

@@ -3,11 +3,11 @@ import TimeframeComparison from './TimeframeComparison';
 import { ComparisonResult, Role, TimeframeOption } from '../../types';
 import { TicketingServiceFactory, TicketingSystem } from '../../services/factory/TicketingServiceFactory';
 import ApplicationLayout from '../layout/ApplicationLayout';
-import { config } from '../../config/env';
 import { MetricsComparator } from '../../services/MetricsComparator';
 import MetricComparisonResult from './MetricComparisonResult';
 import { ITicketingService } from '../../services/interfaces/ITicketingService';
 import { ITicketingConfig } from '../../services/interfaces/ITicketingConfig';
+import {ConfigurationService} from "../../services/ConfigurationService.ts";
 
 interface MetricComparisonPageProps {
     jiraConfig: ITicketingConfig;
@@ -24,7 +24,7 @@ const MetricComparisonPage: React.FC<MetricComparisonPageProps> = ({ jiraConfig,
         try {
             const ticketingService: ITicketingService = TicketingServiceFactory.createService(
                 TicketingSystem.JIRA,
-                { ...jiraConfig, ...config.jira }
+                { ...jiraConfig, ...ConfigurationService.loadConfig() }
             );
             
             const [data1, data2] = await Promise.all([

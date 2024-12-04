@@ -3,11 +3,11 @@ import axios from 'axios';
 import Select, { StylesConfig, GroupBase } from 'react-select';
 import { JiraField } from '../../types';
 import { ITicketingConfig } from '../../services/interfaces/ITicketingConfig';
-import { config } from '../../config/env';
 import { TicketingServiceFactory, TicketingSystem } from '../../services/factory/TicketingServiceFactory';
 import { useTheme } from '../../context/ThemeContext';
 import { Dialog } from '@headlessui/react';
 import './ConfigDialog.css';
+import {ConfigurationService} from "../../services/ConfigurationService.ts";
 
 interface ConfigDialogProps {
     isOpen: boolean;
@@ -34,9 +34,9 @@ const ConfigDialog: React.FC<ConfigDialogProps> = ({
                     const service = TicketingServiceFactory.createService(
                         TicketingSystem.JIRA,
                         {
-                            baseUrl: jiraConfig.baseUrl || config.jira.baseUrl,
-                            email: jiraConfig.email || config.jira.email,
-                            apiToken: jiraConfig.apiToken || config.jira.apiToken,
+                            baseUrl: jiraConfig.baseUrl || ConfigurationService.loadConfig().baseUrl,
+                            email: jiraConfig.email || ConfigurationService.loadConfig().email,
+                            apiToken: jiraConfig.apiToken || ConfigurationService.loadConfig().apiToken,
                             project: jiraConfig.project,
                             board: jiraConfig.board,
                             developerField: jiraConfig.developerField,
@@ -53,7 +53,7 @@ const ConfigDialog: React.FC<ConfigDialogProps> = ({
 
             fetchFields().catch((err) => console.error('Error in fetching fields:', err));
         }
-    }, [activeTab, jiraConfig, config]);
+    }, [activeTab, jiraConfig]);
 
     const handleTabChange = (newValue: number) => {
         setActiveTab(newValue);
