@@ -4,18 +4,18 @@ import LeaderCard from './LeaderCard';
 import PerformanceChart from './PerformanceChart';
 import TimeframeSelector from './TimeframeSelector';
 import TeamStats from './TeamStats';
-import MockDataStrip from '../layout/MockDataStrip';
 import SearchBar from '../commom_components/SearchBar';
 import RoleSlider from './RoleSlider';
 import {commonStyle} from '../styles/commonStyles';
 import {TicketingServiceFactory, TicketingSystem} from '../../services/factory/TicketingServiceFactory';
 import {config} from '../../config/env';
-import type {Engineer, JiraConfig, Role, Sprint, TimeframeOption} from '../../types';
+import {ITicketingConfig} from '../../services/interfaces/ITicketingConfig';
+import type {Engineer, Role, Sprint, TimeframeOption} from '../../types';
 import ApplicationLayout from '../layout/ApplicationLayout';
 
 interface MainPageProps {
-    jiraConfig: JiraConfig;
-    handleConfigSave: (newConfig: JiraConfig) => void;
+    jiraConfig: ITicketingConfig;
+    handleConfigSave: (config: ITicketingConfig) => void;
     role: Role;
     setRole: (role: Role) => void;
     isMockData: boolean;
@@ -26,7 +26,6 @@ const MainPage: React.FC<MainPageProps> = ({
                                                jiraConfig,
                                                role,
                                                setRole,
-                                               isMockData,
                                                setIsMockData,
                                            }) => {
     const [sprints, setSprints] = useState<Sprint[]>([]);
@@ -134,7 +133,6 @@ const MainPage: React.FC<MainPageProps> = ({
                     </div>
 
                     <RoleSlider role={role} setRole={setRole}/>
-                    <MockDataStrip isMockData={isMockData}/>
 
                     {loading ? (
                         <div className="flex justify-center items-center h-64">

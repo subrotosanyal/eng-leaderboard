@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import TimeframeComparison from './TimeframeComparison';
-import { ComparisonResult, JiraConfig, Role, TimeframeOption } from '../../types';
+import { ComparisonResult, Role, TimeframeOption } from '../../types';
 import { TicketingServiceFactory, TicketingSystem } from '../../services/factory/TicketingServiceFactory';
 import ApplicationLayout from '../layout/ApplicationLayout';
 import { config } from '../../config/env';
 import { MetricsComparator } from '../../services/MetricsComparator';
 import MetricComparisonResult from './MetricComparisonResult';
 import { ITicketingService } from '../../services/interfaces/ITicketingService';
+import { ITicketingConfig } from '../../services/interfaces/ITicketingConfig';
 
 interface MetricComparisonPageProps {
-    jiraConfig: JiraConfig;
+    jiraConfig: ITicketingConfig;
     setIsMockData: (isMock: boolean) => void;
     role: Role;
 }

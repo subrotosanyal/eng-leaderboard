@@ -13,17 +13,26 @@ import {
     PointElement,
     Tooltip,
 } from 'chart.js';
-import { Issue, JiraConfig, Role } from '../../types';
-import { getStoryPointsPerDeveloper } from '../../services/utils/jiraUtils';
+import { Issue, Role } from '../../types';
+import { getStoryPointsPerDeveloper } from '../../services/implementation/utils/jiraUtils';
 import Card from '../commom_components/Card';
-import {commonStyle} from "../styles/commonStyles.ts";
+import { commonStyle } from "../styles/commonStyles.ts";
+import { ITicketingConfig } from '../../services/interfaces/ITicketingConfig';
 
 // Register required Chart.js components
-Chart.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Tooltip, Legend);
+Chart.register(
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    BarElement,
+    Legend,
+    Tooltip
+);
 
 interface EngineerGraphProps {
     issues: Issue[];
-    jiraConfig: JiraConfig;
+    jiraConfig: ITicketingConfig;
     role: Role;
 }
 

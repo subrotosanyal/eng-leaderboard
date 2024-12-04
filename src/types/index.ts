@@ -55,26 +55,9 @@ export interface Issue {
         [key: string]: unknown;
     };
 }
-
-export interface JiraConfig {
-    project: string;
-    board: string;
-    developerField: JiraField;
-    storyPointField: JiraField;
-    testedByField: JiraField;
-    baseUrl?: string;
-    email?: string;
-    apiToken?: string;
-}
-
 export enum Role {
     Developer = 'Developer',
     QA = 'QA'
-}
-
-export interface DateRange {
-    start: Date | null;
-    end: Date | null;
 }
 
 export interface ComparisonResult {

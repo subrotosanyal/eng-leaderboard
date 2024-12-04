@@ -1,10 +1,11 @@
 import axios from 'axios';
-import { config } from '../config/env';
+import {ConfigurationService} from "../ConfigurationService.ts";
 
 const api = axios.create({
   // baseURL: config.jira.baseUrl,
+
   headers: {
-    'Authorization': `Basic ${btoa(`${config.jira.email}:${config.jira.apiToken}`)}`,
+    'Authorization': `Basic ${btoa(ConfigurationService.loadConfig().email + ':' + ConfigurationService.loadConfig().apiToken)}`,
     'Accept': 'application/json',
     'Content-Type': 'application/json',
     'X-Atlassian-Token': 'no-check',

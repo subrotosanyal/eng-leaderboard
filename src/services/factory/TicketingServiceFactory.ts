@@ -1,6 +1,6 @@
 import { ITicketingService } from '../interfaces/ITicketingService';
 import { ITicketingConfig } from '../interfaces/ITicketingConfig';
-import { JiraService } from '../jiraService';
+import { JiraService } from '../implementation/jiraService';
 
 export enum TicketingSystem {
     JIRA = 'JIRA'

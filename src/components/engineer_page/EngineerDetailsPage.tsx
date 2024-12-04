@@ -5,10 +5,19 @@ import { config } from '../../config/env';
 import Card from '../commom_components/Card';
 import EngineerGraph from './EngineerGraph';
 import { commonStyle } from '../styles/commonStyles';
-import { Issue, JiraConfig, Role, UserDetails } from '../../types';
+import { Issue, Role, UserDetails } from '../../types';
+import { ITicketingConfig } from '../../services/interfaces/ITicketingConfig';
 import ApplicationLayout from "../layout/ApplicationLayout.tsx";
 
-const EngineerDetailsPage: React.FC<{ jiraConfig: JiraConfig; role: Role }> = ({ jiraConfig, role }) => {
+interface EngineerDetailsPageProps {
+    jiraConfig: ITicketingConfig;
+    role: Role;
+}
+
+const EngineerDetailsPage: React.FC<EngineerDetailsPageProps> = ({
+    jiraConfig,
+    role
+}) => {
     const { engineerId } = useParams<{ engineerId: string }>();
     const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
     const [tickets, setTickets] = useState<Issue[]>([]);

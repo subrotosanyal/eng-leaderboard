@@ -1,31 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Select, { StylesConfig, GroupBase } from 'react-select';
-import { JiraConfig, JiraField } from '../../types';
+import { JiraField } from '../../types';
+import { ITicketingConfig } from '../../services/interfaces/ITicketingConfig';
 import { config } from '../../config/env';
 import { TicketingServiceFactory, TicketingSystem } from '../../services/factory/TicketingServiceFactory';
 import { useTheme } from '../../context/ThemeContext';
+import { Dialog } from '@headlessui/react';
 import './ConfigDialog.css';
 
 interface ConfigDialogProps {
-    open: boolean;
+    isOpen: boolean;
     onClose: () => void;
+    onSave: (config: ITicketingConfig) => void;
+    initialConfig: ITicketingConfig;
 }
 
-const ConfigDialog: React.FC<ConfigDialogProps> = ({ open, onClose }) => {
+const ConfigDialog: React.FC<ConfigDialogProps> = ({
+    isOpen,
+    onClose,
+    onSave,
+    initialConfig
+}) => {
     useTheme();
     const [activeTab, setActiveTab] = useState(0);
-    const [jiraEmail, setJiraEmail] = useState(localStorage.getItem('jiraEmail') || config.jira.email);
-    const [jiraBaseUrl, setJiraBaseUrl] = useState(localStorage.getItem('jiraBaseUrl') || config.jira.baseUrl);
-    const [jiraApiToken, setJiraApiToken] = useState(localStorage.getItem('jiraApiToken') || config.jira.apiToken);
-    const defaultJiraField = {key: '', name: '', clauseName: ''};
-    const [jiraConfig, setJiraConfig] = useState<JiraConfig>({
-        project: localStorage.getItem('jiraProject') || '',
-        board: localStorage.getItem('jiraBoard') || '',
-        developerField: JSON.parse(localStorage.getItem('jiraDeveloperField') || JSON.stringify(defaultJiraField)),
-        storyPointField: JSON.parse(localStorage.getItem('jiraStoryPointField') || JSON.stringify(defaultJiraField)),
-        testedByField: JSON.parse(localStorage.getItem('jiraTestedByField') || JSON.stringify(defaultJiraField)),
-    });
+    const [jiraConfig, setJiraConfig] = useState<ITicketingConfig>(initialConfig);
     const [fields, setFields] = useState<JiraField[]>([]);
 
     useEffect(() => {
@@ -35,9 +34,9 @@ const ConfigDialog: React.FC<ConfigDialogProps> = ({ open, onClose }) => {
                     const service = TicketingServiceFactory.createService(
                         TicketingSystem.JIRA,
                         {
-                            baseUrl: jiraBaseUrl || config.jira.baseUrl,
-                            email: jiraEmail || config.jira.email,
-                            apiToken: jiraApiToken || config.jira.apiToken,
+                            baseUrl: jiraConfig.baseUrl || config.jira.baseUrl,
+                            email: jiraConfig.email || config.jira.email,
+                            apiToken: jiraConfig.apiToken || config.jira.apiToken,
                             project: jiraConfig.project,
                             board: jiraConfig.board,
                             developerField: jiraConfig.developerField,
@@ -54,19 +53,19 @@ const ConfigDialog: React.FC<ConfigDialogProps> = ({ open, onClose }) => {
 
             fetchFields().catch((err) => console.error('Error in fetching fields:', err));
         }
-    }, [activeTab, jiraBaseUrl, jiraEmail, jiraApiToken, jiraConfig]);
+    }, [activeTab, jiraConfig, config]);
 
     const handleTabChange = (newValue: number) => {
         setActiveTab(newValue);
     };
 
     const handleSaveFirstTab = async () => {
-        localStorage.setItem('jiraEmail', jiraEmail);
-        localStorage.setItem('jiraBaseUrl', jiraBaseUrl);
-        localStorage.setItem('jiraApiToken', jiraApiToken);
+        localStorage.setItem('jiraEmail', jiraConfig.email ?? '');
+        localStorage.setItem('jiraBaseUrl', jiraConfig.baseUrl ?? '');
+        localStorage.setItem('jiraApiToken', jiraConfig.apiToken ?? '');
 
         try {
-            await axios.post('/update-config', { jiraBaseUrl });
+            await axios.post('/update-config', { jiraBaseUrl: jiraConfig.baseUrl });
         } catch (error) {
             console.error('Failed to update configuration:', error);
         }
@@ -76,12 +75,13 @@ const ConfigDialog: React.FC<ConfigDialogProps> = ({ open, onClose }) => {
     };
 
     const handleSaveSecondTab = () => {
-        localStorage.setItem('jiraProject', jiraConfig.project);
-        localStorage.setItem('jiraBoard', jiraConfig.board);
-        localStorage.setItem('jiraDeveloperField', JSON.stringify(jiraConfig.developerField));
-        localStorage.setItem('jiraStoryPointField', JSON.stringify(jiraConfig.storyPointField));
-        localStorage.setItem('jiraTestedByField', JSON.stringify(jiraConfig.testedByField));
+        localStorage.setItem('jiraProject', jiraConfig.project ?? '');
+        localStorage.setItem('jiraBoard', jiraConfig.board ?? '');
+        localStorage.setItem('jiraDeveloperField', JSON.stringify(jiraConfig.developerField ?? {}));
+        localStorage.setItem('jiraStoryPointField', JSON.stringify(jiraConfig.storyPointField ?? {}));
+        localStorage.setItem('jiraTestedByField', JSON.stringify(jiraConfig.testedByField ?? {}));
         
+        onSave(jiraConfig);
         onClose();
         window.location.reload();
     };
@@ -107,10 +107,10 @@ const ConfigDialog: React.FC<ConfigDialogProps> = ({ open, onClose }) => {
         }),
     };
 
-    if (!open) return null;
+    if (!isOpen) return null;
 
     return (
-        <div className="dialog-overlay">
+        <Dialog open={isOpen} onClose={onClose} className="dialog-overlay">
             <div className="dialog">
                 <div className="dialog-title">
                     <h2>Configuration</h2>
@@ -127,7 +127,7 @@ const ConfigDialog: React.FC<ConfigDialogProps> = ({ open, onClose }) => {
                         <button
                             className={`tab ${activeTab === 1 ? 'active' : ''}`}
                             onClick={() => handleTabChange(1)}
-                            disabled={!jiraEmail || !jiraBaseUrl || !jiraApiToken}
+                            disabled={!jiraConfig.email || !jiraConfig.baseUrl || !jiraConfig.apiToken}
                         >
                             Project Configuration
                         </button>
@@ -137,22 +137,22 @@ const ConfigDialog: React.FC<ConfigDialogProps> = ({ open, onClose }) => {
                             <input
                                 type="email"
                                 placeholder="Jira Email"
-                                value={jiraEmail}
-                                onChange={(e) => setJiraEmail(e.target.value)}
+                                value={jiraConfig.email}
+                                onChange={(e) => setJiraConfig({ ...jiraConfig, email: e.target.value })}
                                 className="input"
                             />
                             <input
                                 type="url"
                                 placeholder="Jira Base URL"
-                                value={jiraBaseUrl}
-                                onChange={(e) => setJiraBaseUrl(e.target.value)}
+                                value={jiraConfig.baseUrl}
+                                onChange={(e) => setJiraConfig({ ...jiraConfig, baseUrl: e.target.value })}
                                 className="input"
                             />
                             <input
                                 type="password"
                                 placeholder="Jira API Token"
-                                value={jiraApiToken}
-                                onChange={(e) => setJiraApiToken(e.target.value)}
+                                value={jiraConfig.apiToken}
+                                onChange={(e) => setJiraConfig({ ...jiraConfig, apiToken: e.target.value })}
                                 className="input"
                             />
                             <button onClick={handleSaveFirstTab} className="button">
@@ -240,7 +240,7 @@ const ConfigDialog: React.FC<ConfigDialogProps> = ({ open, onClose }) => {
                     )}
                 </div>
             </div>
-        </div>
+        </Dialog>
     );
 };
 

@@ -5,6 +5,7 @@ import ThemeSwitcher from '../config/ThemeSwitcher';
 import ScreenshotButton from '../utils/ScreenshotButton';
 import { commonStyle } from '../styles/commonStyles';
 import ConfigDialog from '../config/ConfigDialog';
+import {ConfigurationService} from "../../services/ConfigurationService.ts";
 
 interface SidePanelProps {
     isMenuCollapsed: boolean;
@@ -57,10 +58,10 @@ const SidePanel: React.FC<SidePanelProps> = ({
                     </li>
                 </ul>
             </nav>
-            <ConfigDialog 
-                open={isConfigDialogOpen} 
-                onClose={() => setIsConfigDialogOpen(false)}
-            />
+            <ConfigDialog
+                isOpen={isConfigDialogOpen}
+                onSave={() => setIsConfigDialogOpen(false)}
+                onClose={() => setIsConfigDialogOpen(false)} initialConfig={ConfigurationService.loadConfig()}            />
         </aside>
     );
 };
